@@ -1,0 +1,15 @@
+--cpu Cortex-M3
+".\baseuart.o"
+".\glcd_fonts.o"
+".\glcd_mcb1700.o"
+".\led_mcb1700.o"
+".\ssp_lpc17xx.o"
+".\uart_lpc17xx.o"
+".\gpdma_lpc17xx.o"
+".\gpio_lpc17xx.o"
+".\pin_lpc17xx.o"
+".\startup_lpc17xx_1.o"
+".\system_lpc17xx_1.o"
+--ro-base 0x00000000 --entry 0x00000000 --rw-base 0x10000000 --entry Reset_Handler --first __Vectors --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\amine.map" -o .\amine.randy
