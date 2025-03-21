@@ -1,0 +1,11 @@
+		//lien vers la description des fonctions ADC:
+		//https://www.disca.upv.es/aperles/arm_cortex_m3/llibre/st/STM32F439xx_User_Manual/stm32f4xx__hal__adc_8h.html
+		
+		
+		HAL_ADC_Start(...); // start A/D conversion
+
+		HAL_ADC_PollForConversion(..., ...) == HAL_OK  //Check if conversion is completed
+		
+		HAL_ADC_GetValue(...); // read digital value when conversion is completed
+		
+		HAL_ADC_Stop(...); // stop conversion
