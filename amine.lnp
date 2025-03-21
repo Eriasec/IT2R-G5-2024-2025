@@ -1,8 +1,11 @@
 --cpu Cortex-M3
-".\baseuart.o"
+".\main.o"
+".\rfid_tache.o"
 ".\glcd_fonts.o"
 ".\glcd_mcb1700.o"
 ".\led_mcb1700.o"
+"C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\LIB\ARM\RTX_CM3.lib"
+".\rtx_conf_cm.o"
 ".\ssp_lpc17xx.o"
 ".\uart_lpc17xx.o"
 ".\gpdma_lpc17xx.o"
