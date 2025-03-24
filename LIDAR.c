@@ -43,11 +43,17 @@ osThreadId ID_ThreadLidarEnvoi;
 // __________ Variables globales __________ \\
 
 
+
+
+
+
+
 // __________ OS Threads __________ \\
 
 void threadLidarRecep(void const * argument) {
-	int k=0, i;
-	unsigned char reception[50] = {0}, header[10], data[50];
+	int k=0, i, offset=0;
+	unsigned char reception[200] = {0}, header[10], data[50];
+	uint16_t angle, distance, angleVeritable, distanceVeritable;
 	char state = 0, tab[10];
 	
 	while(1) {
@@ -60,26 +66,33 @@ void threadLidarRecep(void const * argument) {
 					for(i=0; i<7; i++) {
 						header[i] = reception[i];
 					}
-					GLCD_DrawChar(0,72,'r');
 					state = 1;
 				}
 				break;
 			case 1:
-				Driver_USART1.Receive(reception, 5);
-				for(i=0; i<5; i++) {
-					data[i] = reception[i];
-					sprintf(tab, "%x", data[i]);
-					GLCD_DrawString(0,96,tab);
-				}
+				Driver_USART1.Receive(reception, 200);
+				state = 2;
 				break;
-//			case 2:
-//				Driver_USART1.Receive(reception, 1);
-//				header[k+2] = reception[0];
-//				if(k >= 4) {
-//					state = 3;
-//				}
-//				k++;
-//				break;
+			case 2:
+				while(reception[offset] != 0x3E) {
+					offset++;
+				}
+				for(i=offset; i<200; i+=5) {
+					if(reception[i] >= 0x20) {
+						angle = 		(reception[i+1] & 0xFE) >> 1;		// _____ Octets 0 ?  6 de l'angle _____
+						angle += 		(reception[i+2] & 0xFF) << 7;		// _____ Octets 7 ? 14 de l'angle _____
+						distance = 	(reception[i+3] & 0xFF) << 0;		// _____ Octets 0 ?  7 de l'angle _____
+						distance += (reception[i+4] & 0xFF) << 8;		// _____ Octets 8 ? 15 de l'angle _____
+						angleVeritable = angle / 64;
+						distanceVeritable = distance / 4;
+						sprintf(tab, "angle : %d", angleVeritable);
+						GLCD_DrawString(0, 72, tab);
+						sprintf(tab, "distance : %d", distanceVeritable);
+						GLCD_DrawString(0, 96, tab);
+					}
+				}
+				state = 1;
+				break;
 		}
 	}
 }
@@ -89,18 +102,24 @@ void threadLidarEnvoi(void const * argument) {
 	GLCD_DrawChar(0,24,'e');
 	LIDAR_Scan();
 	while(1) {
-//		sprintf(tab, "%d", n);
-//		GLCD_DrawString(0,48,tab);
-//		LIDAR_Get_Info();
-//		n++;
 		osDelay(50);
 	}
 }
+
+
+
+
+
 
 // __________ OS Thread Def __________ \\
 
 osThreadDef(threadLidarRecep, osPriorityNormal, 1, 0);
 osThreadDef(threadLidarEnvoi, osPriorityNormal, 1, 0);
+
+
+
+
+
 
 // __________ Main __________ \\
 
