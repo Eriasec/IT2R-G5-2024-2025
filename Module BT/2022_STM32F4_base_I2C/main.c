@@ -193,15 +193,14 @@ void tache1(void const *argument){
 	
 		// Generation de valeurs fixes
 		int bp = 1;
+		while(1){
+			sprintf((char *)rx_buffer, " bp: %04d\n", bp);
 		
-		sprintf((char *)rx_buffer, " bp: %04d\n", bp);
-	
-		while(Driver_USART2.GetStatus().tx_busy == 1); // attente buffer TX vide
-		Driver_USART2.Send(rx_buffer, strlen((char *)rx_buffer));
-		osSignalWait(0x0002, 1000);	
+			while(Driver_USART2.GetStatus().tx_busy == 1); // attente buffer TX vide
+			Driver_USART2.Send(rx_buffer, strlen((char *)rx_buffer));
+			osSignalWait(0x0002, 1000);	
+		}
 }
-
-
 
 
 
