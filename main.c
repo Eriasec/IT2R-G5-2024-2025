@@ -1,8 +1,23 @@
 #include "Driver_USART.h"               // ::CMSIS Driver:USART
+#include "Driver_CAN.h"                 // ::CMSIS Driver:CAN
 #include <stdio.h>
 #include <string.h>
 extern ARM_DRIVER_USART Driver_USART3;
 extern ARM_DRIVER_USART Driver_USART2;
+extern ARM_DRIVER_CAN Driver_CAN1;
+
+//void Init_CAN(void){
+//  Driver_CAN1.Initialize(NULL, NULL);
+//  Driver_CAN1.PowerControl(ARM_POWER_FULL);
+//  Driver_CAN1.SetMode(ARM_CAN_MODE_INITIALIZATION);
+//  Driver_CAN1.SetBitrate( ARM_CAN_BITRATE_NOMINAL,
+//                          125000,
+//                          ARM_CAN_BIT_PROP_SEG(5U) |
+//                          ARM_CAN_BIT_PHASE_SEG1(1U) |
+//                          ARM_CAN_BIT_PHASE_SEG2(1U) |
+//                          ARM_CAN_BIT_SJW(1U)
+//);
+//}
 
 void Init_UART(void){
 	Driver_USART3.Initialize(NULL);        //Recevoir une trame - Broche PD8/9
@@ -29,7 +44,7 @@ void Init_UART(void){
 }
 
 int main (void){
-  int i = 0;
+
 	char trame[500];       // Trame recue
   
   char id[] = "$GPRMC";  // ID du message compris dans la trame
@@ -39,31 +54,36 @@ int main (void){
   char NS;               // NORD ou SUD : "N" ou "S"
   float longitude;
   char EW;               // EST ou OUEST : "E" ou "W"
-  char debugBuf[20];
-  int Nbr1;       // Nombre de champs correctement convertis et affectés
-	char Nbr2[3];
-  
+  char debugBuf[100];
+  int valide;       // Nombre de champs correctement scannés et affectés
+
+  char *p;     //Pointe au début de la séquence "$GPRMC..."
+  char msg[] = "Pas de $GPRMC dans ce bloc"; // Message d'erreur
   
   Init_UART();
+  
 
 	while (1)
   {
-		 
-		Driver_USART3.Receive(trame,500);       // On recoit la trame du module GPS
-    while(Driver_USART3.GetRxCount()<1);
+		Driver_USART3.Receive(trame, 500);  // On reçoit la trame du module GPS
+    while (Driver_USART3.GetRxCount() < 80);
 
-    Nbr1 = sscanf(trame, "$GPRMC,%f,%c,%f,%c,%f,%c", &time, &status, &latitude, &NS, &longitude, &EW);    
+    p = strstr(trame, "$GPRMC"); // On cherche "$GPRMC", si on trouve, on a l'adresse de la case correspondante
 
-    sprintf(debugBuf, "%d\r\n", Nbr1);
+    if (p != NULL) 
+    {
+      valide = sscanf(p, "$GPRMC,%f,%c,%f,%c,%f,%c",&time, &status, &latitude, &NS, &longitude, &EW);
 
-    
-    while(Driver_USART2.GetStatus().tx_busy == 1);
-    Driver_USART2.Send(trame, strlen(trame));
+      sprintf(debugBuf, "valide=%d, lat=%.4f, %c, lon=%.4f, %c, status=%c\r\n", valide, latitude, NS, longitude, EW, status); // On scanne les données
+      while (Driver_USART2.GetStatus().tx_busy);
+      Driver_USART2.Send(debugBuf, strlen(debugBuf));
+    }
 
-
-
-    
-    
+    else // Envoi message d'erreur
+    {
+      while (Driver_USART2.GetStatus().tx_busy);
+      Driver_USART2.Send(msg, strlen(msg));
+    }
 	}	
 	return 0;
 }

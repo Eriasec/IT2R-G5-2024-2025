@@ -21,6 +21,9 @@
 #define RTE_DEVICE_HAL_RCC
 #define RTE_DEVICE_HAL_USART
 #define RTE_DEVICE_STARTUP_STM32F4XX    /* Device Startup for STM32F4 */
+#define RTE_Drivers_CAN1                /* Driver CAN1 */
+        #define RTE_Drivers_CAN2                /* Driver CAN2 */
+        #define RTE_Drivers_CAN3                /* Driver CAN3 */
 #define RTE_Drivers_USART1              /* Driver USART1 */
         #define RTE_Drivers_USART2              /* Driver USART2 */
         #define RTE_Drivers_USART3              /* Driver USART3 */
