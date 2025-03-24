@@ -100,7 +100,7 @@ static void Error_Handler(void);
 
 extern ARM_DRIVER_USART Driver_USART2;
 
-
+// 1 2 3 
 
 void Init_UART(void);
 void UART_Callback(uint32_t event);
