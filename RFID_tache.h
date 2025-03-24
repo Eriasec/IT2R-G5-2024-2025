@@ -33,3 +33,4 @@ void Init_UART0(void);
 void Init_UART1(void) ;
 void envoison(void);
 void initialise_player(void);
+void choixPiste(void);

@@ -16,25 +16,55 @@
 
 
 	
-	char numfichierHexa[3]; 
-	char datadfplayer[10];
-
+	//char numfichierHexa[3]; 
+	
+void choixPiste(void){
+	
+		uint16_t checksum=0 ;
+    // Trame complète pour jouer le fichier 1 
+    uint8_t choix[10] = {
+        0x7E,  // Start
+        0xFF,  // Version
+        0x06,  // Longueur des données (6 octets)
+        0x0F,  // choisir un dossier
+        0x00,  // Pas de réponse nécessaire
+        0x01,  // dossier 1
+        0x01,  // fichier 1
+        0x00,  // Checksum à calculé
+				0x00,
+        0xEF   // End
+    };
+		checksum = checksum - choix[1] - choix[2] - choix[3] - choix[4] - choix[5] - choix[6];
+		
+		choix[7] = (checksum >> 8); // & 0xFF;  // Checksum Poid fort
+    choix[8] = checksum ; //& 0xFF;         // Checksum Poid faible
+    
+    // Envoi de la trame via UART
+    while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
+    Driver_USART0.Send(choix, 10);  // Envoi des 10 octets
+	
+	
+}
 	
 void envoison(void){
-	
-    // Trame complète pour jouer le fichier 19 (0x13)
+		 uint16_t checksum=0 ;
+    // Trame complète pour jouer le fichier 1 
     uint8_t datadfplayer[10] = {
         0x7E,  // Start
         0xFF,  // Version
         0x06,  // Longueur des données (6 octets)
         0x03,  // Commande pour jouer un fichier
         0x00,  // Pas de réponse nécessaire
-        0x00,  // Octet élevé du numéro du fichier (haut de 19 = 0x00)
-        0x13,  // Octet faible du numéro du fichier (bas de 19 = 0x13)
-        0xFF,  // Byte checksum (calculé)
-        0xE6,  // Byte checksum (calculé)
+        0x00,  // Octet élevé du numéro du fichier 
+        0x01,  // Octet faible du numéro du fichier 
+        0xFF,  // Checksum à calculé
+				0xE6,
         0xEF   // End
     };
+		//checksum = checksum - datadfplayer[1] - datadfplayer[2] - datadfplayer[3] - datadfplayer[4] - datadfplayer[5] - datadfplayer[6];
+		
+		//datadfplayer[7] = (checksum >> 8); // & 0xFF;  // Checksum Poid fort
+    //datadfplayer[8] = checksum ; //& 0xFF;         // Checksum Poid faible
     
     // Envoi de la trame via UART
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
@@ -51,6 +81,7 @@ void Init_UART0(void){
 							ARM_USART_FLOW_CONTROL_NONE,
 							9600);
 	Driver_USART0.Control(ARM_USART_CONTROL_TX,1);
+	Driver_USART0.Control(ARM_USART_CONTROL_RX,1);
 	
 }
 
@@ -80,19 +111,26 @@ void delay_ms(int ms) {
 }
 
 void initialise_player(void) {
-    // Trame d'initialisation pour U-disk (ID 0x01)
-    uint8_t initCommand[] = {
+   uint16_t checksum=0 ;
+	// Trame d'initialisation pour U-disk (ID 0x01)
+    uint8_t initCommand[10] = {
         0x7E,  // Début de la commande
         0xFF,  // Information sur la version du module
         0x06,  // Longueur des données (6 octets)
-        0x3F,  // Type d'appareil (ici U-disk)
-        0x00,  // Paramètre supplémentaire
-        0x00,  // Identifiant du périphérique
-        0x01,  // Identifiant spécifique (U-disk)
-        0xDD,  // Checksum calculé (à remplacer selon les besoins)
-        0xEF   // Fin de la commande
+        0x09,  // commande
+				0x00,  // feedback
+        0x00,  // Paramètre 1
+        0x01,  // Paramètre 2
+        0x00,  // Checksum à calculé
+				0x00,
+				0xEF   // Fin de la commande
     };
-
+	 checksum = checksum - initCommand[1] - initCommand[2] - initCommand[3] - initCommand[4] - initCommand[5] - initCommand[6];
+		
+		initCommand[7] = (checksum >> 8) ;//& 0xFF;  // Checksum Poid fort
+    initCommand[8] = checksum ;//& 0xFF;         // Checksum Poid faible
+		
+			
     // Envoi de la trame via UART (s'assurer que l'UART est prêt)
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que l'UART soit prêt
     Driver_USART0.Send(initCommand, sizeof(initCommand));  // Envoi de la trame

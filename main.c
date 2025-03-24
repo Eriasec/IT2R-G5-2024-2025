@@ -105,7 +105,7 @@ void RFID(void *argument) {
 
 
 osThreadId ID_TacheRFID ;
-osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+//osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
 
 
 
@@ -128,15 +128,25 @@ int main (void){
 	GLCD_ClearScreen();
 	GLCD_SetFont(&GLCD_Font_6x8);
 	initialise_player();
-	osKernelInitialize() ;
 	
-	ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
-	osKernelStart() ;
-	osDelay(osWaitForever) ;
+	
+	//osKernelInitialize() ;
+	
+	//ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
+	
+	//osKernelStart() ;
+	//osDelay(osWaitForever) ;
 
+	delay_ms(200);
+	choixPiste();
+	
+	delay_ms(200);
+	
 	
 	while (1){
+	envoison();
 			
+
 } return 0;}
 
 
