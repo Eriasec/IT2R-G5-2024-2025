@@ -1,9 +1,14 @@
 #include "stm32f4xx_hal.h"              // Keil::Device:STM32Cube HAL:Common
 #include "adc_F4.h"
+#include "stm32f4xx_hal_adc.h"
 
 #include "main.h"
 #include "Board_LED.h"                  // ::Board Support:LED
+#include <stdio.h>
 
+//extern ARM_DRIVER_USART Driver_USART3;	
+
+#define HAL_ADC_MODULE_ENABLED
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
 #endif
@@ -13,7 +18,8 @@
 
 #ifdef RTE_CMSIS_RTOS2_RTX5
 
-	
+
+
 void ADC_Initialize(ADC_HandleTypeDef *ADCHandle,unsigned int channel);
 	
 	
@@ -45,7 +51,7 @@ uint32_t HAL_GetTick (void) {
 
 static void SystemClock_Config(void);
 static void Error_Handler(void);
-static void ADC_Init(ADC_HandleTypeDef* hadc); 
+//static void ADC_Init(ADC_HandleTypeDef* hadc); 
 
 /**
   * @brief  Main program
@@ -54,128 +60,47 @@ static void ADC_Init(ADC_HandleTypeDef* hadc);
   */
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	void SysTick_Handler(void)  // pour sortir du sys tick 
+	{
+		HAL_IncTick();
+	}
+
+
 int main(void)
 {
-
+//  Init_UART();
+  char tab [50]; 
+	float voltage;
+	uint32_t adcValue;
+  ADC_HandleTypeDef hadc1;
   HAL_Init();
-	
-
   SystemClock_Config();
   SystemCoreClockUpdate();
 
 	LED_Initialize();
-	
-
-#ifdef RTE_CMSIS_RTOS2	
-
-  osKernelInitialize ();
-
-
-  osKernelStart();
-#endif
-
+	ADC_Initialize(&hadc1,1);
 
   while (1)
   {
-
-  }
-}
-
-
-HAL_StatusTypeDef HAL_ADC_Start	(	ADC_HandleTypeDef * 	hadc	)
-{
-  HAL_StatusTypeDef tmp_hal_status = HAL_OK;
-  __IO uint32_t counter = 0UL;
-
-  /* Check the parameters */
-  assert_param(IS_ADC_ALL_INSTANCE(hadc->Instance));
-
-  /* Verify that ADC is not already busy */
-  if (hadc->State == HAL_ADC_STATE_READY)
-  {
-    /* Set ADC state */
-    hadc->State = HAL_ADC_STATE_BUSY_REG;
-
-    /* Start conversion if ADC is effectively enabled */
-    if (LL_ADC_IsEnabled(hadc->Instance) == 1UL)
-    {
-      /* Clear regular group conversion flag and overrun flag */
-      LL_ADC_ClearFlag_EOC(hadc->Instance);
-      LL_ADC_ClearFlag_OVR(hadc->Instance);
-
-      /* Enable conversion of regular group */
-      LL_ADC_REG_StartConversion(hadc->Instance);
+	 HAL_ADC_Start(&hadc1); // démarrer une conversion
+	 while (HAL_ADC_PollForConversion(&hadc1, 100) != HAL_OK);  // Délai conversion est terminée 100 ms
+		
+   adcValue = HAL_ADC_GetValue(&hadc1); // valeur de l'adc lue
+	voltage = (adcValue * 3.3f) / 4095.0f; // adc value= valeur de l'adc, 3.3f =3.3V, 4095.0f= valeur maximale pour un ADC 12 bits, convertit la valeur brute en volts
+    sprintf(tab,"Tension: %.2f V\n", voltage); // afficher la valeur de la tension
     }
-    else
-    {
-      /* Enable the ADC peripheral */
-      tmp_hal_status = ADC_Enable(hadc);
-
-      /* Check if ADC is effectively enabled */
-      if (tmp_hal_status == HAL_OK)
-      {
-        /* Start conversion of regular group */
-        LL_ADC_REG_StartConversion(hadc->Instance);
-      }
-      else
-      {
-        /* Update ADC state machine to error */
-        hadc->State = HAL_ADC_STATE_ERROR_INTERNAL;
-      }
-    }
-  }
-  else
-  {
-    tmp_hal_status = HAL_BUSY;
+		
   }
 
-  /* Return function status */
-  return tmp_hal_status;
 
 
-}
 
-//HAL_StatusTypeDef HAL_ADC_PollForConversion	(	ADC_HandleTypeDef * 	hadc, uint32_t 	Timeout )
-//{
-//}
-
-
-//uint32_t HAL_ADC_GetValue	(	ADC_HandleTypeDef * 	hadc	)	
-//{
-
-
-//}
-
-//HAL_StatusTypeDef HAL_ADC_Stop	(	ADC_HandleTypeDef * 	hadc	)	
-//{
-
-
-//}
-
-
-void ADC_Initialize(ADC_HandleTypeDef *ADCHandle,unsigned int channel)
+void ADC_Initialize(ADC_HandleTypeDef *ADCHandle,unsigned int channel) // pour utiliser l'adc
 {	
 	ADC_ChannelConfTypeDef Channel_AN;
 	GPIO_InitTypeDef ADCpin; 
 	
-
+ 
 	__HAL_RCC_ADC1_CLK_ENABLE();
 	ADCHandle->Instance = ADC1; // create an instance of ADC1
 	ADCHandle->Init.Resolution = ADC_RESOLUTION_12B; // select 12-bit resolution 
@@ -211,25 +136,6 @@ void ADC_Initialize(ADC_HandleTypeDef *ADCHandle,unsigned int channel)
 	Channel_AN.SamplingTime = ADC_SAMPLETIME_15CYCLES; // set sampling time to 15 clock cycles
 	HAL_ADC_ConfigChannel(ADCHandle, &Channel_AN); // select channel_8 for ADC1 module. 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
