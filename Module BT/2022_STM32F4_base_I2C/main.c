@@ -100,11 +100,12 @@ static void Error_Handler(void);
 
 extern ARM_DRIVER_USART Driver_USART2;
 
-// 1 2 3 
+osThreadId tache1_id;
 
 void Init_UART(void);
 void UART_Callback(uint32_t event);
-
+void tache1(void const *argument);
+osThreadDef(tache1, osPriorityNormal, 1, 0);
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -129,23 +130,18 @@ int main(void)
   /* Configure the system clock to 168 MHz */
   SystemClock_Config();
   SystemCoreClockUpdate();
-
+	//#ifdef RTE_CMSIS_RTOS2
+		/* Initialize CMSIS-RTOS2 */
+		osKernelInitialize ();
   /* Add your application code here
      */
 		 
 		 
-	uint8_t tx_buffer[50];
-	int bp = 1;
+
 	Init_UART();
+	tache1_id = osThreadCreate(osThread(tache1), NULL);
 		 
-		 
-		 
-		 
-		 
-		 
-	//#ifdef RTE_CMSIS_RTOS2
-  /* Initialize CMSIS-RTOS2 */
-  osKernelInitialize ();
+	
 	
 	//NVIC_SetPriority(USART2_IRQn,2);		// nécessaire ? (si LCD ?)
 	
@@ -154,7 +150,9 @@ int main(void)
   /* Create thread functions that start executing, 
   Example: osThreadNew(app_main, NULL, NULL); */
 	
-  /* Start thread execution */
+
+  
+	/* Start thread execution */
   osKernelStart();
 	//LED_On (3);
 //#endif
@@ -163,10 +161,6 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
-		sprintf((char *)tx_buffer, " bp: %04d\n", bp);
-		while(Driver_USART2.GetStatus().tx_busy == 1); // attente buffer TX vide
-		Driver_USART2.Send(tx_buffer, strlen((char *)tx_buffer));
-		osSignalWait(0x0002, 1000);
 	
   }
 }
@@ -192,6 +186,19 @@ void UART_Callback(uint32_t event){
         osSignalSet(tache1_id, 0x0002);
     }
     	
+}
+
+void tache1(void const *argument){
+		uint8_t rx_buffer[50];
+	
+		// Generation de valeurs fixes
+		int bp = 1;
+		
+		sprintf((char *)rx_buffer, " bp: %04d\n", bp);
+	
+		while(Driver_USART2.GetStatus().tx_busy == 1); // attente buffer TX vide
+		Driver_USART2.Send(rx_buffer, strlen((char *)rx_buffer));
+		osSignalWait(0x0002, 1000);	
 }
 
 
