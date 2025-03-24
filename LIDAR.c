@@ -46,52 +46,53 @@ osThreadId ID_ThreadLidarEnvoi;
 // __________ OS Threads __________ \\
 
 void threadLidarRecep(void const * argument) {
-	int i;
-	uint8_t reception[1000] = {0}, header[10];
-	uint16_t angle, distance, angleVeritable, distanceVeritable;		// _____ Angle véritable en ° || Distance véritable en mm _____
+	int k=0, i;
+	unsigned char reception[50] = {0}, header[10], data[50];
 	char state = 0, tab[10];
 	
 	while(1) {
 		// _____ Attente du réveil _____
 		osSignalWait(0x01, osWaitForever);
 		switch(state) {
-			case 0:	// _____ Traitement header _____
+			case 0:
 				Driver_USART1.Receive(reception, 7);
-				if((reception[0] == LIDAR_START_HEADER) && (reception[1] == LIDAR_RESPONSE_HEADER)) {		// _____ Vérification header = 0xA5 0x5A _____
+				if((reception[0] == LIDAR_START_HEADER) && (reception[1] == LIDAR_RESPONSE_HEADER)) {
 					for(i=0; i<7; i++) {
 						header[i] = reception[i];
 					}
+					GLCD_DrawChar(0,72,'r');
 					state = 1;
 				}
 				break;
-			case 1:	// _____ Reception donnees _____
-				Driver_USART1.Receive(reception, 1000);
-				state =2;
-				break;
-			case 2:
-				for(i=0; i<200; i++) {
-					if(reception[i*5] >= 0x20) {
-						angle = 		(reception[i+1] & 0xFE) >> 1;		// _____ Octets 0 à  6 de l'angle _____
-						angle += 		(reception[i+2] & 0xFF) << 7;		// _____ Octets 7 à 14 de l'angle _____
-						distance = 	(reception[i+3] & 0xFF) << 0;		// _____ Octets 0 à  7 de l'angle _____
-						distance += (reception[i+4] & 0xFF) << 8;		// _____ Octets 8 à 15 de l'angle _____
-						angleVeritable = angle / 64;
-						distanceVeritable = distance / 4;
-						sprintf(tab, "angle : %d", angleVeritable);
-						GLCD_DrawString(0, 72, tab);
-						sprintf(tab, "distance : %d", distanceVeritable);
-						GLCD_DrawString(0, 72, tab);
-					}
+			case 1:
+				Driver_USART1.Receive(reception, 5);
+				for(i=0; i<5; i++) {
+					data[i] = reception[i];
+					sprintf(tab, "%x", data[i]);
+					GLCD_DrawString(0,96,tab);
 				}
 				break;
+//			case 2:
+//				Driver_USART1.Receive(reception, 1);
+//				header[k+2] = reception[0];
+//				if(k >= 4) {
+//					state = 3;
+//				}
+//				k++;
+//				break;
 		}
 	}
 }
 
 void threadLidarEnvoi(void const * argument) {
+//	char n = 0, tab[10];
 	GLCD_DrawChar(0,24,'e');
 	LIDAR_Scan();
 	while(1) {
+//		sprintf(tab, "%d", n);
+//		GLCD_DrawString(0,48,tab);
+//		LIDAR_Get_Info();
+//		n++;
 		osDelay(50);
 	}
 }
