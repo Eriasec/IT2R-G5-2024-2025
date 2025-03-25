@@ -1,6 +1,7 @@
 
 #include "UART_LPC17xx.h"
 #include "stdio.h"
+#include "math.h"
 #include "Board_GLCD.h"                 // ::Board Support:Graphic LCD
 #include "GLCD_Config.h"                // Keil.MCB1700::Board Support:Graphic LCD
 #include "GLCD_Fonts.h"                 // Keil.MCB1700::Board Support:Graphic LCD
@@ -39,82 +40,97 @@ void callbackUSARTRecep(uint32_t event);
 
 osThreadId ID_ThreadLidarRecep;
 osThreadId ID_ThreadLidarEnvoi;
+osThreadId ID_ThreadLidarTraitement;
 
 // __________ Variables globales __________ \\
 
+typedef struct {
+	uint8_t reception[200];
+} maStructure;
 
+// __________ OS MailBox __________ \\
 
-
+osMailQId ID_BAL;
+osMailQDef(BAL_Reception, 3, maStructure);
 
 
 
 // __________ OS Threads __________ \\
 
 void threadLidarRecep(void const * argument) {
-	int k=0, i, offset=0;
-	unsigned char reception[200] = {0}, header[10], data[50];
-	uint16_t angle, distance, angleVeritable, distanceVeritable;
-	char state = 0, tab[10];
+	maStructure *t_ptr;
+	
+	uint8_t reception[200] = {0};
+	char state = 0;
+	
+	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
+	
+	// _____ Attente de la fin du send _____
+	osSignalWait(0x02, osWaitForever);
 	
 	while(1) {
-		// _____ Attente du réveil _____
-		osSignalWait(0x01, osWaitForever);
 		switch(state) {
 			case 0:
-				Driver_USART1.Receive(reception, 7);
-				if((reception[0] == LIDAR_START_HEADER) && (reception[1] == LIDAR_RESPONSE_HEADER)) {
-					for(i=0; i<7; i++) {
-						header[i] = reception[i];
-					}
+				Driver_USART1.Receive(reception, 7);		// _____ Reception du header _____
+				osSignalWait(0x01, osWaitForever);			// _____ Attente de la fin du receive _____
+				if((reception[0] == LIDAR_START_HEADER) && (reception[1] == LIDAR_RESPONSE_HEADER)) {		// _____ Vérification du header (0xA5, 0x5A)
 					state = 1;
 				}
 				break;
+				
 			case 1:
-				Driver_USART1.Receive(reception, 200);
-				state = 2;
-				break;
-			case 2:
-				while(reception[offset] != 0x3E) {
-					offset++;
-				}
-				for(i=offset; i<200; i+=5) {
-					if(reception[i] >= 0x20) {
-						angle = 		(reception[i+1] & 0xFE) >> 1;		// _____ Octets 0 ?  6 de l'angle _____
-						angle += 		(reception[i+2] & 0xFF) << 7;		// _____ Octets 7 ? 14 de l'angle _____
-						distance = 	(reception[i+3] & 0xFF) << 0;		// _____ Octets 0 ?  7 de l'angle _____
-						distance += (reception[i+4] & 0xFF) << 8;		// _____ Octets 8 ? 15 de l'angle _____
-						angleVeritable = angle / 64;
-						distanceVeritable = distance / 4;
-						sprintf(tab, "angle : %d", angleVeritable);
-						GLCD_DrawString(0, 72, tab);
-						sprintf(tab, "distance : %d", distanceVeritable);
-						GLCD_DrawString(0, 96, tab);
-					}
-				}
-				state = 1;
+				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
+				Driver_USART1.Receive(t_ptr->reception, 200);
+				osSignalWait(0x01, osWaitForever);
+				osMailPut(ID_BAL, t_ptr);
 				break;
 		}
 	}
 }
 
 void threadLidarEnvoi(void const * argument) {
-//	char n = 0, tab[10];
 	GLCD_DrawChar(0,24,'e');
 	LIDAR_Scan();
 	while(1) {
-		osDelay(50);
+		osDelay(osWaitForever);
+	}
+}
+	
+void threadLidarTraitement(void const * agument) {
+	maStructure *r_ptr;
+	osEvent evt;
+	
+	int i;
+	uint16_t angle, distance, angleVeritable, distanceVeritable;
+//	char tab[10];
+	while(1) {
+		evt = osMailGet(ID_BAL,osWaitForever);
+		if(evt.status == osEventMail) {
+			r_ptr = evt.value.p;
+			for(i=0; i<200; i+=5) {
+				if(r_ptr->reception[i] >= 0x20) {
+					angle = 		(r_ptr->reception[i+1] & 0xFE) >> 1;		// _____ Octets 0 ?  6 de l'angle _____
+					angle += 		(r_ptr->reception[i+2] & 0xFF) << 7;		// _____ Octets 7 ? 14 de l'angle _____
+					distance = 	(r_ptr->reception[i+3] & 0xFF) << 0;		// _____ Octets 0 ?  7 de l'angle _____
+					distance += (r_ptr->reception[i+4] & 0xFF) << 8;		// _____ Octets 8 ? 15 de l'angle _____
+					angleVeritable = angle / 64;
+					distanceVeritable = distance / 4;
+					GLCD_DrawPixel(angleVeritable,distanceVeritable);
+				}
+			}
+			osMailFree(ID_BAL, r_ptr);
+		}
 	}
 }
 
 
 
 
-
-
 // __________ OS Thread Def __________ \\
 
-osThreadDef(threadLidarRecep, osPriorityNormal, 1, 0);
+osThreadDef(threadLidarRecep, osPriorityAboveNormal, 1, 0);
 osThreadDef(threadLidarEnvoi, osPriorityNormal, 1, 0);
+osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 
 
 
@@ -128,6 +144,7 @@ int main(void) {
 	osKernelInitialize();
 	ID_ThreadLidarRecep = osThreadCreate(osThread(threadLidarRecep), NULL);
 	ID_ThreadLidarEnvoi = osThreadCreate(osThread(threadLidarEnvoi), NULL);
+	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
@@ -207,14 +224,11 @@ void LIDAR_Force_Scan(void) {
 // __________ Fonctions Callback __________ \\
 
 void callbackUSARTRecep(uint32_t event) {
-	uint32_t mask;
 	
-	mask = ARM_USART_EVENT_RECEIVE_COMPLETE  |
-         ARM_USART_EVENT_TRANSFER_COMPLETE |
-         ARM_USART_EVENT_SEND_COMPLETE     |
-         ARM_USART_EVENT_TX_COMPLETE       ;
-	
-	if(event & mask) {
+	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
 		osSignalSet(ID_ThreadLidarRecep, 0x01);
+	}
+	if(event & ARM_USART_EVENT_SEND_COMPLETE) {
+		osSignalSet(ID_ThreadLidarRecep, 0x02);
 	}
 }
