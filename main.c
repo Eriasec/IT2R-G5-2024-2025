@@ -41,7 +41,6 @@ void callbackUSART(uint32_t event);
 // __________ OS Thread ID __________ \\
 
 osThreadId ID_ThreadLidarRecep;
-osThreadId ID_ThreadLidarEnvoi;
 osThreadId ID_ThreadLidarTraitement;
 
 // __________ Variables globales __________ \\
@@ -67,8 +66,9 @@ void threadLidarRecep(void const * argument) {
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
 	
-	// _____ Attente de la fin du send _____
-	osSignalWait(0x02, osWaitForever);
+	GLCD_DrawChar(0,24,'e');
+	LIDAR_Scan();
+	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 	
 	while(1) {
 		switch(state) {
@@ -87,14 +87,6 @@ void threadLidarRecep(void const * argument) {
 				osMailPut(ID_BAL, t_ptr);
 				break;
 		}
-	}
-}
-
-void threadLidarEnvoi(void const * argument) {
-	GLCD_DrawChar(0,24,'e');
-	LIDAR_Scan();
-	while(1) {
-		osDelay(osWaitForever);
 	}
 }
 	
@@ -143,7 +135,6 @@ void threadLidarTraitement(void const * agument) {
 // __________ OS Thread Def __________ \\
 
 osThreadDef(threadLidarRecep, osPriorityAboveNormal, 1, 0);
-osThreadDef(threadLidarEnvoi, osPriorityNormal, 1, 0);
 osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 
 
@@ -157,7 +148,6 @@ int main(void) {
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
 	ID_ThreadLidarRecep = osThreadCreate(osThread(threadLidarRecep), NULL);
-	ID_ThreadLidarEnvoi = osThreadCreate(osThread(threadLidarEnvoi), NULL);
 	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
 	
 	// _____ Initialisation de l'UART _____
