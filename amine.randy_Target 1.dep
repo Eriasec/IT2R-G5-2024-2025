@@ -1,5 +1,5 @@
 Dependencies for Project 'amine.randy', Target 'Target 1': (DO NOT MODIFY !)
-F (.\main.c)(0x67E67E37)(-c --cpu Cortex-M3 -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver-I C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board-D__UVISION_VERSION="517" -D_RTE_ -DLPC175x_6x-o .\main.o --omf_browse .\main.crf --depend .\main.d)
+F (.\main.c)(0x67E6897B)(-c --cpu Cortex-M3 -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver-I C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board-D__UVISION_VERSION="517" -D_RTE_ -DLPC175x_6x-o .\main.o --omf_browse .\main.crf --depend .\main.d)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_USART.h)(0x5C8A78DC)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_Common.h)(0x5C8A78DC)
 I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x55DB71CE)
@@ -21,9 +21,9 @@ I (C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h)(0x665789
 I (C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h)(0x67E654DA)
 I (C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h)(0x67E654DA)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5C8A78DC)
-I (RFID_tache.h)(0x67E67E0B)
-F (.\RFID_tache.h)(0x67E67E0B)()
-F (.\RFID_tache.c)(0x67E67FB0)(-c --cpu Cortex-M3 -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver-I C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board-D__UVISION_VERSION="517" -D_RTE_ -DLPC175x_6x-o .\rfid_tache.o --omf_browse .\rfid_tache.crf --depend .\rfid_tache.d)
+I (RFID_tache.h)(0x67E6891C)
+F (.\RFID_tache.h)(0x67E6891C)()
+F (.\RFID_tache.c)(0x67E6897B)(-c --cpu Cortex-M3 -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver-I C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board-D__UVISION_VERSION="517" -D_RTE_ -DLPC175x_6x-o .\rfid_tache.o --omf_browse .\rfid_tache.crf --depend .\rfid_tache.d)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_USART.h)(0x5C8A78DC)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_Common.h)(0x5C8A78DC)
 I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x55DB71CE)
@@ -45,7 +45,7 @@ I (C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h)(0x665789
 I (C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h)(0x67E654DA)
 I (C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h)(0x67E654DA)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5C8A78DC)
-I (RFID_tache.h)(0x67E67E0B)
+I (RFID_tache.h)(0x67E6891C)
 F (C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common\GLCD_Fonts.c)(0x6657899A)(-c --cpu Cortex-M3 -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE-I C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver-I C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board-D__UVISION_VERSION="517" -D_RTE_ -DLPC175x_6x-o .\glcd_fonts.o --omf_browse .\glcd_fonts.crf --depend .\glcd_fonts.d)
 I (C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common\GLCD_Fonts.h)(0x6657899A)
 I (C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board\Board_GLCD.h)(0x53BB68A2)

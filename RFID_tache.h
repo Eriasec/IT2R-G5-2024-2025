@@ -34,5 +34,6 @@ void Init_UART1(void) ;
 void envoison(uint8_t numFichier);
 void initialise_player(void);
 void choixPiste(void);
-void next(void);
-void volume_choix(uint8_t choix);
+void next1(void);
+void pause(void);
+	

@@ -19,6 +19,36 @@
  
 
 
+
+void next(void *argument){
+	
+		uint16_t checksum=0 ;
+    // Trame complète pour jouer le fichier 1 
+    uint8_t next1[10] = {
+        0x7E,  // Start
+        0xFF,  // Version
+        0x06,  // Longueur des données (6 octets)
+        0x01,  // choisir un dossier
+        0x00,  // Pas de réponse nécessaire
+        0x00,  // dossier 1
+        0x00,  // fichier 1
+        0x00,  // Checksum à calculé
+				0x00,
+        0xEF   // End
+    };
+		checksum =  ~(next1[1] + next1[2] + next1[3] + next1[4] + next1[5] + next1[6]) + 1;
+		
+		
+		next1[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
+    next1[8] = checksum & 0xFF;         // Checksum Poid faible
+    
+    // Envoi de la trame via UART
+    while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
+    Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
+	
+	}
+
+void RFID(void *argument) {
 	int i ;
   int j ;
   uint8_t trame[50];
@@ -26,10 +56,6 @@
   uint8_t UID_cible[4] = {0x30, 0x34, 0x31, 0x42};
   char hexStr[2];
   int hexCount =0 ;
-	
-
-
-void RFID(void *argument) {
 	
 	while(1) { 
 		
@@ -70,7 +96,8 @@ void RFID(void *argument) {
     }
     //allumage d'une led si UID trouvé : 
   if (memcmp(uid, UID_cible, 4) == 0) {
-    LED_On(5);
+    next1();
+		LED_On(5);
     delay_ms(100000); 
     LED_Off(5);
   }
@@ -106,9 +133,10 @@ void RFID(void *argument) {
 
 
 osThreadId ID_TacheRFID ;
-//osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+//osThreadId ID_Tachenext ;
 
-
+osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+//osThreadDef (next, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
 
 
 
@@ -131,25 +159,27 @@ int main (void){
 	initialise_player();
 	
 	
-	//osKernelInitialize() ;
+	osKernelInitialize() ;
 	
-	//ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
-	
-	//osKernelStart() ;
-	//osDelay(osWaitForever) ;
+		ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
+		//ID_Tachenext = osThreadCreate ( osThread ( next ), NULL ) ;
+	osKernelStart() ;
+	osDelay(osWaitForever) ;
 
 
 	
 	
-	delay_ms(300);
-
 	
 	
 	while (1){
 		
-	next();
+	
 
-	delay_ms(100000);
+
+//	delay_ms(5000);
+//	next();
+//	delay_ms(5000);
+//	next();
 }
 
 }
