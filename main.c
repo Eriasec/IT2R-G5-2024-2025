@@ -1,5 +1,7 @@
 #include "LPC17xx.h"                    // Device header
 #include "GPIO_LPC17xx.h"               // Keil::Device:GPIO
+#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
+
 
 // Définition des broches
 #define IN_A       (1 << 16)  // GPIO P0.16
@@ -9,16 +11,31 @@
 #define PWM_PIN    (1 << 25)  // GPIO P3.25 (PWM Moteur)
 
 
-
 // Configuration du PWM
 #define PWM_FREQUENCY_Moteur     10000  	// 10 kHz pour le moteur
 
+// Déclarations de tâches
+void tache1 (void const * argument) ;
 // Prototypes des fonctions
 void InitGPIO(void);
 void InitPWM(int);
 void Avancer(char vitesse);
 void Reculer(char vitesse);
 void DelayMs(unsigned int ms);
+
+//
+osThreadId ID_Moteur0 ;
+
+// Gestion de l'état du train en fonction des capteurs
+void tache1(void const * argument)
+{
+}
+
+
+
+
+
+
 
 // Initialisation des GPIO
 void InitGPIO(void) 
@@ -61,7 +78,7 @@ void InitPWM(int alpha)
 		LPC_PWM1->TCR = 1;  /*validation de timer  et reset counter */
 }
 
-// Avancer avec une vitesse donnée
+// Avancer avec un rapport cyclique donnée
 void Avancer(char vitesse) 
 {
     LPC_GPIO0-> FIOPIN |= IN_A;					// IN_A à 1
@@ -70,24 +87,31 @@ void Avancer(char vitesse)
     LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
 }
 
-// Reculer avec une vitesse donnée
+
+// Reculer avec un rapport cyclique donnée
 void Reculer(char vitesse) 
-{
+{   
+		LPC_GPIO0-> FIOPIN |= IN_B;					// IN_B à 1 P0.17 , Problème d'alim au niveau de IN_B
     LPC_GPIO0-> FIOPIN &=~ IN_A; 				// IN_A à 0 P0.16
-    LPC_GPIO0-> FIOPIN |= IN_B;					// IN_B à 1 P0.17
     LPC_GPIO0-> FIOPIN |= EN_A | EN_B;		// EN_A & EN_B à 1
-    LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
+    LPC_PWM1->MR2 = vitesse;						// Rapport cyclique vitesse
 }
+
+
+osThreadDef(tache1, osPriorityNormal, 1, 0);
 
 // Fonction principale
 int main(void) {
-    char alpha = 40;
-    InitGPIO();
-    InitPWM(alpha);
 
-    while (1) {
-//        Avancer(50);
-				Reculer(40);
-    }
+		osKernelInitialize(); 
+    // Créer les tâches
+    ID_Moteur0 = osThreadCreate(osThread(tache1), NULL);
+    InitGPIO();
+    InitPWM(40);
+
+    osKernelStart();        
+    osDelay(osWaitForever); 
+  
 }
+
 
