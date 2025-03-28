@@ -1,4 +1,6 @@
 
+// Résolution ecran LCD 320x240
+
 #include "UART_LPC17xx.h"
 #include "stdio.h"
 #include "math.h"
@@ -34,7 +36,7 @@ void LIDAR_Attente_Header(void);
 
 // __________ Prototypes Callback __________ \\
 
-void callbackUSARTRecep(uint32_t event);
+void callbackUSART(uint32_t event);
 
 // __________ OS Thread ID __________ \\
 
@@ -101,20 +103,32 @@ void threadLidarTraitement(void const * agument) {
 	osEvent evt;
 	
 	int i;
-	uint16_t angle, distance, angleVeritable, distanceVeritable;
+	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
 //	char tab[10];
 	while(1) {
 		evt = osMailGet(ID_BAL,osWaitForever);
 		if(evt.status == osEventMail) {
 			r_ptr = evt.value.p;
 			for(i=0; i<200; i+=5) {
-				if(r_ptr->reception[i] >= 0x20) {
-					angle = 		(r_ptr->reception[i+1] & 0xFE) >> 1;		// _____ Octets 0 ?  6 de l'angle _____
-					angle += 		(r_ptr->reception[i+2] & 0xFF) << 7;		// _____ Octets 7 ? 14 de l'angle _____
-					distance = 	(r_ptr->reception[i+3] & 0xFF) << 0;		// _____ Octets 0 ?  7 de l'angle _____
-					distance += (r_ptr->reception[i+4] & 0xFF) << 8;		// _____ Octets 8 ? 15 de l'angle _____
-					angleVeritable = angle / 64;
-					distanceVeritable = distance / 4;
+				if(r_ptr->reception[i] == 0x3E) {
+					angle = 		(r_ptr->reception[i+1] & 0xFE	) >> 1;		// _____ Octets 0 a  6 de l'angle _____
+					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
+					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
+					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
+					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
+					distanceVeritable = distance >> 2;									// Division par 4 pour obtenir la vraie distance
+					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
+					x = (cos((double) angleVeritable) * distanceVeritable) + 160;
+//					y = (sin((double) angleVeritable) * distanceVeritable) + 120;
+//					if(y > 240) {
+//						y = 240;
+//					}
+//					if(x > 320) {
+//						x = 320;
+//					}
+					if(distanceVeritable > 240) {
+						distanceVeritable = 240;
+					}
 					GLCD_DrawPixel(angleVeritable,distanceVeritable);
 				}
 			}
@@ -155,7 +169,7 @@ int main(void) {
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 	GLCD_ClearScreen();
-	GLCD_DrawChar(0,0,'i');
+	GLCD_DrawChar(304,216,'i');
 	
 	// _____ Lancement RTOS _____
 	osKernelStart();
@@ -172,7 +186,7 @@ int main(void) {
 // __________ Fonctions UART __________ \\
 
 void Init_UART1(void) {
-	Driver_USART1.Initialize(callbackUSARTRecep);
+	Driver_USART1.Initialize(callbackUSART);
 	Driver_USART1.PowerControl(ARM_POWER_FULL);
 	Driver_USART1.Control(	ARM_USART_MODE_ASYNCHRONOUS |
 													ARM_USART_DATA_BITS_8 |
@@ -223,7 +237,7 @@ void LIDAR_Force_Scan(void) {
 
 // __________ Fonctions Callback __________ \\
 
-void callbackUSARTRecep(uint32_t event) {
+void callbackUSART(uint32_t event) {
 	
 	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
 		osSignalSet(ID_ThreadLidarRecep, 0x01);
