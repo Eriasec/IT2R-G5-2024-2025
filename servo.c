@@ -37,10 +37,10 @@ void initTimer1 (int prescaler, int match)
 
 int main(void)
 {
-  char direction=15; // entre 8-20 pour direction de tout à droite à tout à gauche // 15:milieu
+  char direction=34; // entre 28-40 pour direction de tout à droite à tout à gauche // 34:milieu
   LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
-  initTimer0( 2499 , 199 ) ;       // PR et MR pour interuption tout les 20 ms
-  initTimer1( 2499 , direction ) ;       // PR et MR pour interuption tout les 20 ms
+  initTimer0( 999 , 499 ) ;       // PR et MR pour interuption tout les 20 ms
+  initTimer1( 999, direction ) ;       // PR et MR pour interuption tout les 20 ms
   while(1); //boucle infinie vide
   return 0 ;
 }
