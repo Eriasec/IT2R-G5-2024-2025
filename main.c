@@ -40,7 +40,7 @@ void callbackUSART(uint32_t event);
 
 // __________ OS Thread ID __________ \\
 
-osThreadId ID_ThreadLidarRecep;
+osThreadId ID_ThreadLidarTrames;
 osThreadId ID_ThreadLidarTraitement;
 
 // __________ Variables globales __________ \\
@@ -58,7 +58,7 @@ osMailQDef(BAL_Reception, 3, maStructure);
 
 // __________ OS Threads __________ \\
 
-void threadLidarRecep(void const * argument) {
+void threadLidarTrames(void const * argument) {
 	maStructure *t_ptr;
 	
 	uint8_t reception[200] = {0};
@@ -134,7 +134,7 @@ void threadLidarTraitement(void const * agument) {
 
 // __________ OS Thread Def __________ \\
 
-osThreadDef(threadLidarRecep, osPriorityAboveNormal, 1, 0);
+osThreadDef(threadLidarTrames, osPriorityAboveNormal, 1, 0);
 osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 
 
@@ -147,7 +147,7 @@ osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 int main(void) {
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
-	ID_ThreadLidarRecep = osThreadCreate(osThread(threadLidarRecep), NULL);
+	ID_ThreadLidarTrames = osThreadCreate(osThread(threadLidarTrames), NULL);
 	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
 	
 	// _____ Initialisation de l'UART _____
@@ -230,9 +230,9 @@ void LIDAR_Force_Scan(void) {
 void callbackUSART(uint32_t event) {
 	
 	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
-		osSignalSet(ID_ThreadLidarRecep, 0x01);
+		osSignalSet(ID_ThreadLidarTrames, 0x01);
 	}
 	if(event & ARM_USART_EVENT_SEND_COMPLETE) {
-		osSignalSet(ID_ThreadLidarRecep, 0x02);
+		osSignalSet(ID_ThreadLidarTrames, 0x02);
 	}
 }
