@@ -17,7 +17,7 @@
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPIO_LPC17xx.h
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board\Board_LED.h
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h
-.\main.o: C:\Users\TEMP.GEII2.015\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
-.\main.o: C:\Users\TEMP.GEII2.015\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
+.\main.o: C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
+.\main.o: C:\Users\TEMP.GEII2.018\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
 .\main.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\main.o: RFID_tache.h

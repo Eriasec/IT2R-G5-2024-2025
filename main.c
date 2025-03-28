@@ -27,7 +27,8 @@
   char hexStr[2];
   int hexCount =0 ;
 	
-	
+
+
 void RFID(void *argument) {
 	
 	while(1) { 
@@ -137,22 +138,21 @@ int main (void){
 	//osKernelStart() ;
 	//osDelay(osWaitForever) ;
 
-	delay_ms(200);
-	choixPiste();
+
 	
-	delay_ms(200);
+	
+	delay_ms(300);
+
 	
 	
 	while (1){
-	envoison();
-			
+		
+	next();
 
-} return 0;}
+	delay_ms(100000);
+}
 
-
-
-
-
+}
 
 
 
