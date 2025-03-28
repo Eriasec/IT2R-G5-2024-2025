@@ -14,5 +14,5 @@
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include\system_LPC17xx.h
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPDMA_LPC17xx.h
-.\objects\uart_lpc17xx.o: U:\Projet_S4\Module BT Receive\RTE\Device\LPC1768\RTE_Device.h
-.\objects\uart_lpc17xx.o: U:\Projet_S4\Module BT Receive\RTE\RTE_Components.h
+.\objects\uart_lpc17xx.o: C:\Users\TEMP.GEII2.023\Documents\GitHub\IT2R-G5-2024-2025\Module BT Receive\RTE\Device\LPC1768\RTE_Device.h
+.\objects\uart_lpc17xx.o: C:\Users\TEMP.GEII2.023\Documents\GitHub\IT2R-G5-2024-2025\Module BT Receive\RTE\RTE_Components.h

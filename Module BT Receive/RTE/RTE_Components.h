@@ -18,6 +18,8 @@
 #define RTE_Drivers_I2C0                /* Driver I2C0 */
         #define RTE_Drivers_I2C1                /* Driver I2C1 */
         #define RTE_Drivers_I2C2                /* Driver I2C2 */
+#define RTE_Drivers_SPI0                /* Driver SPI0 */
+        #define RTE_Drivers_SPI1                /* Driver SPI1 */
 #define RTE_Drivers_USART0              /* Driver USART0 */
         #define RTE_Drivers_USART1              /* Driver USART1 */
         #define RTE_Drivers_USART2              /* Driver USART2 */

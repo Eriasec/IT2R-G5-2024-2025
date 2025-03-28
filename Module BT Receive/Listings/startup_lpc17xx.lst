@@ -431,15 +431,18 @@ ARM Macro Assembler    Page 7
               00000200 
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=.\objects\startup_lpc17xx.d -o.\objects\startup_lpc17xx.o -I"U:\Pr
-ojet_S4\Module BT Receive\RTE" -I"U:\Projet_S4\Module BT Receive\RTE\Board_Supp
-ort" -I"U:\Projet_S4\Module BT Receive\RTE\Device\LPC1768" -IC:\Keil_v5\ARM\PAC
-K\ARM\CMSIS\5.6.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSI
-S\Driver\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC -IC:\
-Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include -IC:\Keil_v5\ARM\PACK\Ke
-il\LPC1700_DFP\3.0.0\RTE_Driver --predefine="__RTX SETA 1" --predefine="__UVISI
-ON_VERSION SETA 517" --predefine="_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1"
- --list=.\listings\startup_lpc17xx.lst RTE\Device\LPC1768\startup_LPC17xx.s
+ork --depend=.\objects\startup_lpc17xx.d -o.\objects\startup_lpc17xx.o -I"C:\Us
+ers\TEMP.GEII2.023\Documents\GitHub\IT2R-G5-2024-2025\Module BT Receive\RTE" -I
+"C:\Users\TEMP.GEII2.023\Documents\GitHub\IT2R-G5-2024-2025\Module BT Receive\R
+TE\Device\LPC1768" -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include -IC
+:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include -IC:\Keil_v5\ARM\PACK\A
+RM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC -IC:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\
+Boards\Keil\MCB1700\Common -IC:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\
+Include -IC:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver -IC:\Keil_v5\AR
+M\PACK\Keil\MDK-Middleware\7.0.0\Board --predefine="__RTX SETA 1" --predefine="
+__UVISION_VERSION SETA 517" --predefine="_RTE_ SETA 1" --predefine="LPC175x_6x 
+SETA 1" --list=.\listings\startup_lpc17xx.lst RTE\Device\LPC1768\startup_LPC17x
+x.s
 
 
 

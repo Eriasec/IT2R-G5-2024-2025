@@ -4,16 +4,21 @@
 #include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "PIN_LPC17xx.h"                // Keil::Device:PIN
 #include "RTE_Device.h"                 // Keil::Device:Startup
-#include "GPIO.h"                       // Keil.IUT S2/S3::Board Support:GPIO:GPIO
-
+                                
+#include "Board_GLCD.h"                 // ::Board Support:Graphic LCD
+#include "GLCD_Config.h"
 #include <stdio.h>
 #include <string.h>
 
 #define ARM_USART_EVENT_RECEIVE_COMPLETE (1UL << 1)
 
+extern GLCD_FONT GLCD_Font_6x8;
+extern GLCD_FONT GLCD_Font_16x24;
+
 extern ARM_DRIVER_USART Driver_USART1;
 ARM_DRIVER_USART *USARTdrv = &Driver_USART1;
 char received;
+char C;
 char rx_buffer[50];
 volatile uint32_t rx_index = 0;
 osThreadId tache1_id;
@@ -26,16 +31,13 @@ osThreadDef(tache1, osPriorityNormal, 1, 0);
 int main(void)
 {
 	osKernelInitialize ();
-	Initialise_GPIO();
-	Eteindre_1LED(1);
-	Eteindre_1LED(2);
-	Eteindre_1LED(3);
-	Eteindre_1LED(4);
-	Eteindre_1LED(5);
-	Eteindre_1LED(6);
-	Eteindre_1LED(7);
-	Eteindre_1LED(0);
 	
+	GLCD_Initialize();
+	GLCD_ClearScreen();
+	GLCD_SetFont(&GLCD_Font_16x24);
+	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
+	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
+	GLCD_DrawString(100,100,"NN");
 	Init_UART();
 	tache1_id = osThreadCreate(osThread(tache1), NULL);
 	
@@ -64,7 +66,7 @@ void Init_UART(void){
 void UART_Callback(uint32_t event){		
 		char msg[50 + 10];
 		
-		Allumer_1LED(1);
+		
 	
 		
 		if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
@@ -100,10 +102,14 @@ void tache1(void const *argument){
 		// Generation de valeurs fixes
 		int bp = 1;
 		while(1){
+			
 			sprintf((char *)rx_buffer, " bp: %04d\n", bp);
 		
 			while(Driver_USART1.GetStatus().tx_busy == 1); // attente buffer TX vide
 			Driver_USART1.Receive(rx_buffer, strlen((char *)rx_buffer));
+			C=rx_buffer[2];
+			sprintf(C,"c=d",*rx_buffer[0]);
+			GLCD_DrawString(100,100,"OK");
 			osSignalWait(0x0002, 1000);	
 		}
 }
