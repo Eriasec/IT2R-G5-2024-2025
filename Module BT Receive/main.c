@@ -18,7 +18,7 @@ extern GLCD_FONT GLCD_Font_16x24;
 extern ARM_DRIVER_USART Driver_USART1;
 ARM_DRIVER_USART *USARTdrv = &Driver_USART1;
 char received;
-char C;
+char C[50],a;
 char rx_buffer[50];
 volatile uint32_t rx_index = 0;
 osThreadId tache1_id;
@@ -63,34 +63,16 @@ void Init_UART(void){
 
 
 
-void UART_Callback(uint32_t event){		
-		char msg[50 + 10];
+void UART_Callback(uint32_t event)
+{		
+
 		
-		
-	
-		
-		if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
-        osSignalSet(tache1_id, 0x0002);
-				USARTdrv -> Receive(&received,1);
+		if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) 
+		{
+        osSignalSet(tache1_id, 0x0002);		
     }
     	
-		 if (received == '\n' || received == '\r') {
-            rx_buffer[rx_index] = '\0'; // Terminer la chaîne
-            rx_index = 0; // Réinitialiser l'index
 
-            // Afficher le message reçu
-            
-            sprintf(msg, "Reçu : %s\n", rx_buffer);
-            USARTdrv->Send(msg, strlen(msg));
-        } else {
-            // Ajouter au buffer si la limite n'est pas atteinte
-            if (rx_index < 50 - 1) {
-                rx_buffer[rx_index++] = received;
-            }
-        }
-
-        // Relancer la réception pour le prochain caractère
-        USARTdrv->Receive(&received, 1);
 }
 
 
@@ -100,16 +82,16 @@ void tache1(void const *argument){
 		uint8_t rx_buffer[50];
 	
 		// Generation de valeurs fixes
-		int bp = 1;
-		while(1){
+
+		while(1)
+		{
+			Driver_USART1.Receive(rx_buffer, sizeof rx_buffer);
+			osSignalWait(0x0002, osWaitForever);	
 			
-			sprintf((char *)rx_buffer, " bp: %04d\n", bp);
-		
-			while(Driver_USART1.GetStatus().tx_busy == 1); // attente buffer TX vide
-			Driver_USART1.Receive(rx_buffer, strlen((char *)rx_buffer));
-			C=rx_buffer[2];
-			sprintf(C,"c=d",*rx_buffer[0]);
-			GLCD_DrawString(100,100,"OK");
-			osSignalWait(0x0002, 1000);	
+			a=rx_buffer[0];
+			sprintf(C,"c=%d",a);
+			GLCD_ClearScreen();
+			GLCD_DrawString(100,100,C);
+			osDelay(100);
 		}
 }
