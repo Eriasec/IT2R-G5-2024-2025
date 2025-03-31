@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\lidar.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\lidar.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Mon Mar 31 12:14:00 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Mon Mar 31 12:18:28 2025
 <BR><P>
 <H3>Maximum Stack Usage =        304 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -256,7 +256,7 @@ Global Symbols
 
 <P><STRONG><a name="[78]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96 + Unknown Stack Size
-<LI>Call Chain = __rt_entry_main &rArr; main &rArr; GLCD_DrawChar &rArr; GLCD_SetWindow &rArr; wr_reg
+<LI>Call Chain = __rt_entry_main &rArr; main &rArr; osKernelInitialize &rArr; svcKernelInitialize &rArr; svcThreadCreate &rArr; rt_tsk_create &rArr; rt_init_context &rArr; rt_init_stack
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit
@@ -593,7 +593,6 @@ Global Symbols
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_SetWindow
 </UL>
 <BR>[Called By]<UL><LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;threadLidarUART
-<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[94]"></a>GLCD_DrawPixel</STRONG> (Thumb, 200 bytes, Stack size 24 bytes, glcd_mcb1700.o(i.GLCD_DrawPixel))
@@ -604,6 +603,7 @@ Global Symbols
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_SetWindow
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;threadLidarTraitement
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[96]"></a>GLCD_Initialize</STRONG> (Thumb, 1534 bytes, Stack size 24 bytes, glcd_mcb1700.o(i.GLCD_Initialize))
@@ -999,8 +999,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrMessagePut
 </UL>
 
-<P><STRONG><a name="[4b]"></a>main</STRONG> (Thumb, 98 bytes, Stack size 8 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = main &rArr; GLCD_DrawChar &rArr; GLCD_SetWindow &rArr; wr_reg
+<P><STRONG><a name="[4b]"></a>main</STRONG> (Thumb, 118 bytes, Stack size 16 bytes, main.o(i.main))
+<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = main &rArr; osKernelInitialize &rArr; svcKernelInitialize &rArr; svcThreadCreate &rArr; rt_tsk_create &rArr; rt_init_context &rArr; rt_init_stack
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadCreate
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
@@ -1010,7 +1010,7 @@ Global Symbols
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_SetFont
 <LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_SetBackgroundColor
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_Initialize
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_DrawChar
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_DrawPixel
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_ClearScreen
 <LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Init_UART1
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;InitPWM

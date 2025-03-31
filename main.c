@@ -147,6 +147,7 @@ osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 // __________ Main __________ \\
 
 int main(void) {
+	int i,j;
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
 	ID_ThreadLidarUART = osThreadCreate(osThread(threadLidarUART), NULL);
@@ -154,7 +155,7 @@ int main(void) {
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
-	InitPWM(600);					
+	InitPWM(600);
 	
 	// _____ Initialisation du GLCD _____
 	GLCD_Initialize();
@@ -162,7 +163,11 @@ int main(void) {
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 	GLCD_ClearScreen();
-	GLCD_DrawChar(304,216,'i');
+	for(i=0; i<3; i++) {
+		for(j=0; j<3; j++) {
+			GLCD_DrawPixel(i+159, j+119);
+		}
+	}
 	
 	// _____ Lancement RTOS _____
 	osKernelStart();
