@@ -16,17 +16,19 @@ extern GLCD_FONT GLCD_Font_6x8;
 extern GLCD_FONT GLCD_Font_16x24;
 
 extern ARM_DRIVER_USART Driver_USART1;
-ARM_DRIVER_USART *USARTdrv = &Driver_USART1;
-char received;
-char C[50],a;
-char rx_buffer[50];
-volatile uint32_t rx_index = 0;
-osThreadId tache1_id;
+
+char a;
+char rx_buffer[20];
+char C,Z,X,Y;
+
+
+osThreadId ID_Receive;
+void Receive_UART(void const * argument);
+osThreadDef (Receive_UART, osPriorityNormal, 1, 0);
 
 void Init_UART(void);
 void UART_Callback(uint32_t event);
-void tache1(void const *argument);
-osThreadDef(tache1, osPriorityNormal, 1, 0);
+
 
 int main(void)
 {
@@ -39,9 +41,10 @@ int main(void)
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 	GLCD_DrawString(100,100,"NN");
 	Init_UART();
-	tache1_id = osThreadCreate(osThread(tache1), NULL);
+	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
 	
 	osKernelStart();
+	osDelay(osWaitForever) ;
 	
 	while (1)
   {
@@ -69,7 +72,7 @@ void UART_Callback(uint32_t event)
 		
 		if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) 
 		{
-        osSignalSet(tache1_id, 0x0002);		
+        osSignalSet(ID_Receive, 0x0002);		
     }
     	
 
@@ -78,20 +81,22 @@ void UART_Callback(uint32_t event)
 
 
 
-void tache1(void const *argument){
-		uint8_t rx_buffer[50];
-	
-		// Generation de valeurs fixes
+void Receive_UART(void const *argument){
+		uint8_t rx_buffer[9];
 
 		while(1)
 		{
-			Driver_USART1.Receive(rx_buffer, sizeof rx_buffer);
-			osSignalWait(0x0002, osWaitForever);	
+			//osDelay(100);
 			
-			a=rx_buffer[0];
-			sprintf(C,"c=%d",a);
-			GLCD_ClearScreen();
-			GLCD_DrawString(100,100,C);
-			osDelay(100);
+			
+			Driver_USART1.Receive(&C, 1);			
+			osSignalWait(0x0002, osWaitForever);
+			Driver_USART1.Receive(&Z, 1);			
+			osSignalWait(0x0002, osWaitForever);
+			Driver_USART1.Receive(&X, 1);			
+			osSignalWait(0x0002, osWaitForever);
+			Driver_USART1.Receive(&Y, 1);			
+			osSignalWait(0x0002, osWaitForever);
+			
 		}
 }
