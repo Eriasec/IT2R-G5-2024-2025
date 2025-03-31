@@ -24,6 +24,7 @@ extern GLCD_FONT GLCD_Font_16x24;
 // __________ Prototypes Fonctions UART __________ \\
 
 void Init_UART1(void);
+void InitPWM(int alpha);
 
 // __________ Prototypes Fonctions LIDAR __________ \\
 
@@ -134,8 +135,8 @@ void threadLidarTraitement(void const * agument) {
 
 // __________ OS Thread Def __________ \\
 
-osThreadDef(threadLidarTrames, osPriorityAboveNormal, 1, 0);
-osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
+osThreadDef(threadLidarTrames, osPriorityAboveNormal, 1, 0);		
+osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);			
 
 
 
@@ -152,6 +153,7 @@ int main(void) {
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
+	InitPWM(600);
 	
 	// _____ Initialisation du GLCD _____
 	GLCD_Initialize();
@@ -176,16 +178,50 @@ int main(void) {
 // __________ Fonctions UART __________ \\
 
 void Init_UART1(void) {
-	Driver_USART1.Initialize(callbackUSART);
-	Driver_USART1.PowerControl(ARM_POWER_FULL);
-	Driver_USART1.Control(	ARM_USART_MODE_ASYNCHRONOUS |
-													ARM_USART_DATA_BITS_8 |
-													ARM_USART_STOP_BITS_1 |
-													ARM_USART_PARITY_NONE |
-													ARM_USART_FLOW_CONTROL_NONE,
-													115200);
-	Driver_USART1.Control(ARM_USART_CONTROL_TX, 1);
-	Driver_USART1.Control(ARM_USART_CONTROL_RX, 1);
+	Driver_USART1.Initialize(callbackUSART);								// Initialisation avec callback
+	Driver_USART1.PowerControl(ARM_POWER_FULL);							// Allimentation par la carte
+	Driver_USART1.Control(	ARM_USART_MODE_ASYNCHRONOUS |		// Mode asynchrone
+													ARM_USART_DATA_BITS_8 |					// 8 bits de donnée
+													ARM_USART_STOP_BITS_1 |					// 1 bit de stop
+													ARM_USART_PARITY_NONE |					// Pas de parité
+													ARM_USART_FLOW_CONTROL_NONE,		// Pas de contrôle de flux
+													115200);												// 115200 bauds
+	Driver_USART1.Control(ARM_USART_CONTROL_TX, 1);					// Activation TX
+	Driver_USART1.Control(ARM_USART_CONTROL_RX, 1);					// Activation RX
+}
+
+// __________ Fonctions PWM __________ \\
+
+void InitPWM(int alpha)
+{
+		// Utilisation d la PWM1.2 
+		// MR2 rapport cyclique alpha du moteur
+		// ils varient de 0 à 99 (cas MR0 associé à 99)
+		// La fréquence de la PWM vaut 10KHz soit 100 us
+		// la fréquence de base est donnée par l'horloge interne de fréquence 25 MHz soir 40ns
+
+		LPC_SC->PCONP = LPC_SC->PCONP | 0x00000040;   // enable PWM1
+
+		// calcul des diviseurs
+		// prescaler+1 = 1us/40ns = 25 cela donne une horloge de base de fréquence 10 KHz = 100 us
+		// valeur + 1 = 100 cela fait 1ms 
+		// la duree de comptage vaut 1 us
+
+		LPC_PWM1->PR = 0;  // prescaler
+		LPC_PWM1->MR0 = 999;    // MR0+1=100   la période de la PWM vaut 100µs
+
+		LPC_PINCON->PINSEL7 = LPC_PINCON->PINSEL7| (3 << 18); // P3.25 est la sortie 1 PWM1   bit19 & bit18 
+
+																	
+		LPC_PWM1->MCR = LPC_PWM1->MCR | 0x00000002; // Compteur relancé quand MR0 repasse à 0
+		LPC_PWM1->LER = LPC_PWM1->LER | 0x0000000F;  // ceci donne le droit de modifier dynamiquement la valeur du rapport cyclique
+		// bit 0 = MR0    bit 1 MR1 bit2 MR2 bit3 = MR3
+		LPC_PWM1->PCR = LPC_PWM1->PCR | 0x00000e00;  // autorise les sortie PWM1/2/3 bits 9, 10, 11
+
+
+		LPC_PWM1->MR2 = alpha;							//Rapport cyclique alpha OU vitesse
+
+		LPC_PWM1->TCR = 1;  /*validation de timer  et reset counter */
 }
 
 // __________ Fonctions LIDAR __________ \\
@@ -228,11 +264,10 @@ void LIDAR_Force_Scan(void) {
 // __________ Fonctions Callback __________ \\
 
 void callbackUSART(uint32_t event) {
-	
-	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
-		osSignalSet(ID_ThreadLidarTrames, 0x01);
+	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {		// Check si réveil sur fin de reception
+		osSignalSet(ID_ThreadLidarTrames, 0x01);				// Réveil de la tache UART sur évenement 0x01
 	}
-	if(event & ARM_USART_EVENT_SEND_COMPLETE) {
-		osSignalSet(ID_ThreadLidarTrames, 0x02);
+	if(event & ARM_USART_EVENT_SEND_COMPLETE) {				// Check si réveil sur fin d'envoi
+		osSignalSet(ID_ThreadLidarTrames, 0x02);				// Réveil de la tache UART sur évenement 0x01
 	}
 }
