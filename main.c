@@ -32,10 +32,10 @@ void next(const void *argument){
         0x7E,  // Start
         0xFF,  // Version
         0x06,  // Longueur des données (6 octets)
-        0x01,  // choisir un dossier
+        0x0F,  // choisir un dossier
         0x00,  // Pas de réponse nécessaire
-        0x00,  // dossier 1
-        0x00,  // fichier 1
+        0x01,  // dossier 1
+        0x03,  // fichier 1
         0x00,  // Checksum à calculé
 				0x00,
         0xEF   // End
