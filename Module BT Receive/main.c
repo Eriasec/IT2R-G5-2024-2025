@@ -23,13 +23,18 @@ char C,Z,X,Y;
 
 
 osThreadId ID_Receive;
+osThreadId ID_Afficher_nunchuk;
+
 void Receive_UART(void const * argument);
-osThreadDef (Receive_UART, osPriorityNormal, 1, 0);
+void Afficher_nunchuk(void const * argument);
+
+
 
 void Init_UART(void);
 void UART_Callback(uint32_t event);
 
-
+osThreadDef (Receive_UART, osPriorityNormal, 1, 0);
+osThreadDef (Afficher_nunchuk, osPriorityNormal, 1, 0);
 int main(void)
 {
 	osKernelInitialize ();
@@ -39,9 +44,11 @@ int main(void)
 	GLCD_SetFont(&GLCD_Font_16x24);
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
-	GLCD_DrawString(100,100,"NN");
+
 	Init_UART();
+	
 	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
+	ID_Afficher_nunchuk = osThreadCreate(osThread(Afficher_nunchuk), NULL);
 	
 	osKernelStart();
 	osDelay(osWaitForever) ;
@@ -63,6 +70,7 @@ void Init_UART(void){
 	Driver_USART1.Control(ARM_USART_CONTROL_TX,1);
 	Driver_USART1.Control(ARM_USART_CONTROL_RX,1);
 }
+
 
 
 
@@ -100,3 +108,23 @@ void Receive_UART(void const *argument){
 			
 		}
 }
+
+void Afficher_nunchuk(void const *argument){
+		
+char a[50];
+char b[50];
+		while(1)
+		{
+		sprintf(a,"C=%d Z=%d ",C,Z);
+		sprintf(b,"X=%3d Y=%3d",X,Y);
+		GLCD_DrawString(10,10,a);
+		GLCD_DrawString(10,50,b);
+		
+		
+		
+
+		
+		}
+}
+
+

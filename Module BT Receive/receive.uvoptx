@@ -168,7 +168,7 @@
           <Type>0</Type>
           <LineNumber>279</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>25598</Address>
+          <Address>26010</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -184,7 +184,7 @@
           <Type>0</Type>
           <LineNumber>282</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>25600</Address>
+          <Address>26012</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -200,7 +200,7 @@
           <Type>0</Type>
           <LineNumber>285</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>25602</Address>
+          <Address>26014</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -216,7 +216,7 @@
           <Type>0</Type>
           <LineNumber>288</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>25604</Address>
+          <Address>26016</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -232,7 +232,7 @@
           <Type>0</Type>
           <LineNumber>290</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>25606</Address>
+          <Address>26018</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -254,6 +254,26 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>rx_buffer</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>C</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Z</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>X</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Y</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -288,6 +308,12 @@
       <LintExecutable></LintExecutable>
       <LintConfigFile></LintConfigFile>
       <bLintAuto>0</bLintAuto>
+      <SystemViewers>
+        <Entry>
+          <Name>OS Support\System and Thread Viewer</Name>
+          <WinId>35905</WinId>
+        </Entry>
+      </SystemViewers>
     </TargetOption>
   </Target>
 
