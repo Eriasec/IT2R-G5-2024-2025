@@ -36,4 +36,5 @@ void initialise_player(void);
 void choixPiste(void);
 void next1(void);
 void pause(void);
+void volume_choix(uint8_t choix);
 	

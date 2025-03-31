@@ -13,6 +13,41 @@
 #include "cmsis_os.h"// Component selection
 #include "RFID_tache.h"   
  
+void volume_choix(uint8_t choix){
+	
+		uint16_t checksum=0 ;
+    // Trame complète pour jouer le fichier 1 
+    uint8_t volume[10] = {
+        0x7E,  // Start
+        0xFF,  // Version
+        0x06,  // Longueur des données (6 octets)
+        0x06,  // cmd
+        0x00,  // Pas de réponse nécessaire
+        0x00,  // volume 1
+        0x00,  // volume2
+        0x00,  // Checksum à calculé
+				0x00,
+        0xEF   // End
+    };
+		volume[6]=choix;
+		checksum =  ~(volume[1] + volume[2] + volume[3] + volume[4] + volume[5] + volume[6]) + 1;
+		
+		
+		volume[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
+    volume[8] = checksum & 0xFF;         // Checksum Poid faible
+    
+    // Envoi de la trame via UART
+    while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
+    Driver_USART0.Send(volume, 10);  // Envoi des 10 octets
+	
+	}
+
+ 
+ 
+ 
+ 
+ 
+ 
  void next1(void){
 	
 		uint16_t checksum=0 ;
@@ -49,7 +84,7 @@ void pause(void){
         0x7E,  // Start
         0xFF,  // Version
         0x06,  // Longueur des données (6 octets)
-        0x0E,  // choisir un dossier
+        0x0E,  // cmd
         0x00,  // Pas de réponse nécessaire
         0x00,  // dossier 1
         0x00,  // fichier 1

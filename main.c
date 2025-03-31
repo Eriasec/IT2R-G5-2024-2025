@@ -10,18 +10,22 @@
 #include "PIN_LPC17xx.h"
 #include "RTE_Device.h"                 // Keil::Device:Startup
 #include "RTE_Components.h" 
-#include "cmsis_os.h"// Component selection
+#include "cmsis_os.h"// Component selection           
 #include "RFID_tache.h" 
+static uint16_t   background_color = GLCD_COLOR_RED;
 
+osThreadId ID_TacheRFID ;
+osThreadId ID_Tachenext ;
 
 
 
  
+ 
 
 
 
-void next(void *argument){
-	
+void next(const void *argument){
+		
 		uint16_t checksum=0 ;
     // Trame complète pour jouer le fichier 1 
     uint8_t next1[10] = {
@@ -36,19 +40,26 @@ void next(void *argument){
 				0x00,
         0xEF   // End
     };
+		
 		checksum =  ~(next1[1] + next1[2] + next1[3] + next1[4] + next1[5] + next1[6]) + 1;
 		
 		
 		next1[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
     next1[8] = checksum & 0xFF;         // Checksum Poid faible
-    
+		volume_choix(0x0F);
+		
+		while(1){
+    osSignalWait(0x01,osWaitForever);
     // Envoi de la trame via UART
+		
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
     Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
-	
+		osDelay(30000);
+		pause();
 	}
+}
 
-void RFID(void *argument) {
+void RFID(const void *argument) {
 	int i ;
   int j ;
   uint8_t trame[50];
@@ -57,7 +68,8 @@ void RFID(void *argument) {
   char hexStr[2];
   int hexCount =0 ;
 	
-	while(1) { 
+	
+	while(1) {
 		
 		GLCD_DrawString(10, 100, "trame: ");
     GLCD_DrawString(10, 150, "UID: ");
@@ -96,47 +108,28 @@ void RFID(void *argument) {
     }
     //allumage d'une led si UID trouvé : 
   if (memcmp(uid, UID_cible, 4) == 0) {
-    next1();
+		osSignalSet(ID_Tachenext,0x01); 
 		LED_On(5);
-    delay_ms(100000); 
+    osDelay(20000);
+		
     LED_Off(5);
   }
+	else {
+		GLCD_SetBackgroundColor(GLCD_COLOR_RED) ;
+		GLCD_ClearScreen();
+		GLCD_DrawString(10, 200, "Chipeur Arrête de chiper!")   ;
+		osDelay(30000);
+		GLCD_SetBackgroundColor(GLCD_COLOR_WHITE) ;
+		GLCD_ClearScreen();
+	}
 
 }
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	
-
-
-	
-
-
-
-
-osThreadId ID_TacheRFID ;
-//osThreadId ID_Tachenext ;
-
 osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
-//osThreadDef (next, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+osThreadDef (next, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+
 
 
 
@@ -147,9 +140,8 @@ osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défau
 	
 
 int main (void){
+	osKernelInitialize() ;
 	
-	
-
   Init_UART1();
 	Init_UART0();
 	LED_Initialize() ;
@@ -159,30 +151,15 @@ int main (void){
 	initialise_player();
 	
 	
-	osKernelInitialize() ;
 	
-		ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
-		//ID_Tachenext = osThreadCreate ( osThread ( next ), NULL ) ;
+	ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
+	ID_Tachenext = osThreadCreate ( osThread ( next ), NULL ) ;
+	
 	osKernelStart() ;
+	
 	osDelay(osWaitForever) ;
 
-
-	
-	
-	
-	
 	while (1){
-		
-	
-
-
-//	delay_ms(5000);
-//	next();
-//	delay_ms(5000);
-//	next();
+		osDelay(osWaitForever);
+	}
 }
-
-}
-
-
-
