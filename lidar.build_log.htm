@@ -28,14 +28,16 @@ Project File Date:  03/31/2025
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling main.c...
-main.c(99): warning:  #550-D: variable "x" was set but never used
-  	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
-main.c(99): warning:  #177-D: variable "y" was declared but never referenced
-  	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
-main.c: 2 warnings, 0 errors
+main.c(100): warning:  #177-D: variable "angleMax" was declared but never referenced
+  	float angleMax = 0, angleMin = 360;
+main.c(100): warning:  #177-D: variable "angleMin" was declared but never referenced
+  	float angleMax = 0, angleMin = 360;
+main.c(102): warning:  #177-D: variable "tab" was declared but never referenced
+  	char tab[10];
+main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=26704 RO-data=7584 RW-data=112 ZI-data=8824  
-".\lidar.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=27156 RO-data=7588 RW-data=112 ZI-data=8824  
+".\lidar.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

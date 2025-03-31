@@ -21,13 +21,13 @@
 
 extern GLCD_FONT GLCD_Font_16x24;
 
-// __________ Prototypes Fonctions UART __________ \\
-
+// __________ Prototypes Fonctions UART __________ 
 void Init_UART1(void);
+
+// __________ Prototypes Fonctions PWM __________ 
 void InitPWM(int alpha);
 
-// __________ Prototypes Fonctions LIDAR __________ \\
-
+// __________ Prototypes Fonctions LIDAR __________ 
 void LIDAR_Reset(void);
 void LIDAR_Stop(void);
 void LIDAR_Get_Info(void);		// Récupère les infos du lidar **Pour on ne lit pas les données renvoyées**
@@ -41,7 +41,7 @@ void callbackUSART(uint32_t event);
 
 // __________ OS Thread ID __________ \\
 
-osThreadId ID_ThreadLidarTrames;
+osThreadId ID_ThreadLidarUART;
 osThreadId ID_ThreadLidarTraitement;
 
 // __________ Variables globales __________ \\
@@ -59,7 +59,7 @@ osMailQDef(BAL_Reception, 3, maStructure);
 
 // __________ OS Threads __________ \\
 
-void threadLidarTrames(void const * argument) {
+void threadLidarUART(void const * argument) {
 	maStructure *t_ptr;
 	
 	uint8_t reception[200] = {0};
@@ -90,14 +90,17 @@ void threadLidarTrames(void const * argument) {
 		}
 	}
 }
-	
+
 void threadLidarTraitement(void const * agument) {
-	maStructure *r_ptr;
-	osEvent evt;
+	// Declaration des variables RTOS
+	maStructure *r_ptr;				// Pointeur vers la boite mail
+	osEvent evt;							// Event
 	
 	int i;
+	float angleMax = 0, angleMin = 360;
 	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
-//	char tab[10];
+	char tab[10];
+	
 	while(1) {
 		evt = osMailGet(ID_BAL,osWaitForever);
 		if(evt.status == osEventMail) {
@@ -109,20 +112,18 @@ void threadLidarTraitement(void const * agument) {
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
 					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
-					distanceVeritable = distance >> 2;									// Division par 4 pour obtenir la vraie distance
+					distanceVeritable = (distance >> 2) - 100;					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
 					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
-					x = (cos((double) angleVeritable) * distanceVeritable) + 160;
-//					y = (sin((double) angleVeritable) * distanceVeritable) + 120;
-//					if(y > 240) {
-//						y = 240;
-//					}
-//					if(x > 320) {
-//						x = 320;
-//					}
-					if(distanceVeritable > 240) {
-						distanceVeritable = 240;
+					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
+					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// calcul de la composante en y (+120 pour afficher au milieu)
+					if(y > 240) {
+						y = 240;
 					}
-					GLCD_DrawPixel(angleVeritable,distanceVeritable);
+					if(x > 320) {
+						x = 320;
+					}
+					
+					GLCD_DrawPixel(x,y);
 				}
 			}
 			osMailFree(ID_BAL, r_ptr);
@@ -135,7 +136,7 @@ void threadLidarTraitement(void const * agument) {
 
 // __________ OS Thread Def __________ \\
 
-osThreadDef(threadLidarTrames, osPriorityAboveNormal, 1, 0);		
+osThreadDef(threadLidarUART, osPriorityAboveNormal, 1, 0);		
 osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);			
 
 
@@ -148,12 +149,12 @@ osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 int main(void) {
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
-	ID_ThreadLidarTrames = osThreadCreate(osThread(threadLidarTrames), NULL);
+	ID_ThreadLidarUART = osThreadCreate(osThread(threadLidarUART), NULL);
 	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
-	InitPWM(600);
+	InitPWM(600);					
 	
 	// _____ Initialisation du GLCD _____
 	GLCD_Initialize();
@@ -192,8 +193,7 @@ void Init_UART1(void) {
 
 // __________ Fonctions PWM __________ \\
 
-void InitPWM(int alpha)
-{
+void InitPWM(int alpha) {
 		// Utilisation d la PWM1.2 
 		// MR2 rapport cyclique alpha du moteur
 		// ils varient de 0 à 99 (cas MR0 associé à 99)
@@ -265,9 +265,9 @@ void LIDAR_Force_Scan(void) {
 
 void callbackUSART(uint32_t event) {
 	if(event & ARM_USART_EVENT_RECEIVE_COMPLETE) {		// Check si réveil sur fin de reception
-		osSignalSet(ID_ThreadLidarTrames, 0x01);				// Réveil de la tache UART sur évenement 0x01
+		osSignalSet(ID_ThreadLidarUART, 0x01);				// Réveil de la tache UART sur évenement 0x01
 	}
 	if(event & ARM_USART_EVENT_SEND_COMPLETE) {				// Check si réveil sur fin d'envoi
-		osSignalSet(ID_ThreadLidarTrames, 0x02);				// Réveil de la tache UART sur évenement 0x01
+		osSignalSet(ID_ThreadLidarUART, 0x02);				// Réveil de la tache UART sur évenement 0x01
 	}
 }
