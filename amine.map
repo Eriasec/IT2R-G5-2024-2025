@@ -4,30 +4,30 @@ Component: ARM Compiler 5.06 update 1 (build 61) Tool: armlink [4d35a8]
 
 Section Cross References
 
-    main.o(i.JouerSon) refers to rt_cmsis.o(i.osMailGet) for osMailGet
-    main.o(i.JouerSon) refers to rt_cmsis.o(i.osMailFree) for osMailFree
     main.o(i.JouerSon) refers to rfid_tache.o(i.volume_choix) for volume_choix
     main.o(i.JouerSon) refers to rt_cmsis.o(i.osSignalWait) for osSignalWait
     main.o(i.JouerSon) refers to led_mcb1700.o(i.LED_Off) for LED_Off
+    main.o(i.JouerSon) refers to rt_cmsis.o(i.osMailGet) for osMailGet
     main.o(i.JouerSon) refers to rfid_tache.o(i.delay_ms) for delay_ms
     main.o(i.JouerSon) refers to rfid_tache.o(i.pause) for pause
+    main.o(i.JouerSon) refers to rt_cmsis.o(i.osMailFree) for osMailFree
     main.o(i.JouerSon) refers to main.o(.data) for ID_BAL
     main.o(i.JouerSon) refers to uart_lpc17xx.o(.constdata) for Driver_USART0
     main.o(i.RFID) refers to _printf_pad.o(.text) for _printf_pre_padding
     main.o(i.RFID) refers to _printf_percent.o(.ARM.Collect$$_printf_percent$$00000000) for _printf_percent
     main.o(i.RFID) refers to _printf_x.o(.ARM.Collect$$_printf_percent$$0000000C) for _printf_x
     main.o(i.RFID) refers to _printf_hex_int.o(.text) for _printf_longlong_hex
+    main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_SetBackgroundColor) for GLCD_SetBackgroundColor
+    main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_ClearScreen) for GLCD_ClearScreen
     main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_SetFont) for GLCD_SetFont
     main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_DrawString) for GLCD_DrawString
     main.o(i.RFID) refers to noretval__2sprintf.o(.text) for __2sprintf
     main.o(i.RFID) refers to memcmp.o(.text) for memcmp
     main.o(i.RFID) refers to rt_cmsis.o(i.osMailAlloc) for osMailAlloc
     main.o(i.RFID) refers to rt_cmsis.o(i.osMailPut) for osMailPut
-    main.o(i.RFID) refers to rt_cmsis.o(i.osSignalSet) for osSignalSet
     main.o(i.RFID) refers to led_mcb1700.o(i.LED_On) for LED_On
+    main.o(i.RFID) refers to rt_cmsis.o(i.osSignalSet) for osSignalSet
     main.o(i.RFID) refers to rt_cmsis.o(i.osDelay) for osDelay
-    main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_SetBackgroundColor) for GLCD_SetBackgroundColor
-    main.o(i.RFID) refers to glcd_mcb1700.o(i.GLCD_ClearScreen) for GLCD_ClearScreen
     main.o(i.RFID) refers to glcd_fonts.o(.constdata) for GLCD_Font_6x8
     main.o(i.RFID) refers to uart_lpc17xx.o(.constdata) for Driver_USART1
     main.o(i.RFID) refers to main.o(.data) for ID_BAL
@@ -1661,26 +1661,26 @@ Image Symbol Table
     .data                                    0x10000064   Section        4  rt_time.o(.data)
     .data                                    0x10000068   Section        8  rt_robin.o(.data)
     .data                                    0x10000070   Section        1  hal_cm.o(.data)
-    .bss                                     0x10000074   Section      156  main.o(.bss)
-    .bss                                     0x10000110   Section     7216  rtx_conf_cm.o(.bss)
-    std_libspace                             0x10001a20   Data         672  rtx_conf_cm.o(.bss)
-    std_libmutex                             0x10001cc0   Data         128  rtx_conf_cm.o(.bss)
-    .bss                                     0x10001d40   Section       44  ssp_lpc17xx.o(.bss)
-    SSP1_Info                                0x10001d40   Data          16  ssp_lpc17xx.o(.bss)
-    SSP1_Xfer                                0x10001d50   Data          28  ssp_lpc17xx.o(.bss)
-    .bss                                     0x10001d6c   Section      104  uart_lpc17xx.o(.bss)
-    USART0_Info                              0x10001d6c   Data          52  uart_lpc17xx.o(.bss)
-    USART1_Info                              0x10001da0   Data          52  uart_lpc17xx.o(.bss)
-    .bss                                     0x10001dd4   Section      160  gpdma_lpc17xx.o(.bss)
-    Channel_info                             0x10001dd4   Data         160  gpdma_lpc17xx.o(.bss)
-    .bss                                     0x10001e74   Section       52  rt_task.o(.bss)
-    .bss                                     0x10001ea8   Section       48  rt_list.o(.bss)
-    .bss                                     0x10001ed8   Section       96  libspace.o(.bss)
-    HEAP                                     0x10001f38   Section        0  startup_lpc17xx.o(HEAP)
-    STACK                                    0x10001f38   Section      512  startup_lpc17xx.o(STACK)
-    Heap_Mem                                 0x10001f38   Data           0  startup_lpc17xx.o(HEAP)
-    Stack_Mem                                0x10001f38   Data         512  startup_lpc17xx.o(STACK)
-    __initial_sp                             0x10002138   Data           0  startup_lpc17xx.o(STACK)
+    .bss                                     0x10000074   Section       36  main.o(.bss)
+    .bss                                     0x10000098   Section     7216  rtx_conf_cm.o(.bss)
+    std_libspace                             0x100019a8   Data         672  rtx_conf_cm.o(.bss)
+    std_libmutex                             0x10001c48   Data         128  rtx_conf_cm.o(.bss)
+    .bss                                     0x10001cc8   Section       44  ssp_lpc17xx.o(.bss)
+    SSP1_Info                                0x10001cc8   Data          16  ssp_lpc17xx.o(.bss)
+    SSP1_Xfer                                0x10001cd8   Data          28  ssp_lpc17xx.o(.bss)
+    .bss                                     0x10001cf4   Section      104  uart_lpc17xx.o(.bss)
+    USART0_Info                              0x10001cf4   Data          52  uart_lpc17xx.o(.bss)
+    USART1_Info                              0x10001d28   Data          52  uart_lpc17xx.o(.bss)
+    .bss                                     0x10001d5c   Section      160  gpdma_lpc17xx.o(.bss)
+    Channel_info                             0x10001d5c   Data         160  gpdma_lpc17xx.o(.bss)
+    .bss                                     0x10001dfc   Section       52  rt_task.o(.bss)
+    .bss                                     0x10001e30   Section       48  rt_list.o(.bss)
+    .bss                                     0x10001e60   Section       96  libspace.o(.bss)
+    HEAP                                     0x10001ec0   Section        0  startup_lpc17xx.o(HEAP)
+    STACK                                    0x10001ec0   Section      512  startup_lpc17xx.o(STACK)
+    Heap_Mem                                 0x10001ec0   Data           0  startup_lpc17xx.o(HEAP)
+    Stack_Mem                                0x10001ec0   Data         512  startup_lpc17xx.o(STACK)
+    __initial_sp                             0x100020c0   Data           0  startup_lpc17xx.o(STACK)
 
     Global Symbols
 
@@ -2035,19 +2035,19 @@ Image Symbol Table
     os_time                                  0x10000064   Data           4  rt_time.o(.data)
     os_robin                                 0x10000068   Data           8  rt_robin.o(.data)
     dbg_msg                                  0x10000070   Data           1  hal_cm.o(.data)
-    os_mailQ_q_NomBAL                        0x10000074   Data          80  main.o(.bss)
-    os_mailQ_m_NomBAL                        0x100000c4   Data          76  main.o(.bss)
-    mp_tcb                                   0x10000110   Data         376  rtx_conf_cm.o(.bss)
-    mp_stk                                   0x10000288   Data        4816  rtx_conf_cm.o(.bss)
-    os_stack_mem                             0x10001558   Data        1032  rtx_conf_cm.o(.bss)
-    os_fifo                                  0x10001960   Data         132  rtx_conf_cm.o(.bss)
-    os_active_TCB                            0x100019e4   Data          28  rtx_conf_cm.o(.bss)
-    os_messageQ_q_osTimerMessageQ            0x10001a00   Data          32  rtx_conf_cm.o(.bss)
-    os_idle_TCB                              0x10001e74   Data          52  rt_task.o(.bss)
-    os_rdy                                   0x10001ea8   Data          24  rt_list.o(.bss)
-    os_dly                                   0x10001ec0   Data          24  rt_list.o(.bss)
-    __libspace_start                         0x10001ed8   Data          96  libspace.o(.bss)
-    __temporary_stack_top$libspace           0x10001f38   Data           0  libspace.o(.bss)
+    os_mailQ_q_NomBAL                        0x10000074   Data          20  main.o(.bss)
+    os_mailQ_m_NomBAL                        0x10000088   Data          16  main.o(.bss)
+    mp_tcb                                   0x10000098   Data         376  rtx_conf_cm.o(.bss)
+    mp_stk                                   0x10000210   Data        4816  rtx_conf_cm.o(.bss)
+    os_stack_mem                             0x100014e0   Data        1032  rtx_conf_cm.o(.bss)
+    os_fifo                                  0x100018e8   Data         132  rtx_conf_cm.o(.bss)
+    os_active_TCB                            0x1000196c   Data          28  rtx_conf_cm.o(.bss)
+    os_messageQ_q_osTimerMessageQ            0x10001988   Data          32  rtx_conf_cm.o(.bss)
+    os_idle_TCB                              0x10001dfc   Data          52  rt_task.o(.bss)
+    os_rdy                                   0x10001e30   Data          24  rt_list.o(.bss)
+    os_dly                                   0x10001e48   Data          24  rt_list.o(.bss)
+    __libspace_start                         0x10001e60   Data          96  libspace.o(.bss)
+    __temporary_stack_top$libspace           0x10001ec0   Data           0  libspace.o(.bss)
 
 
 
@@ -2411,20 +2411,20 @@ Memory Map of the image
     0x10000070   0x00000001   Data   RW         2360    .data               RTX_CM3.lib(hal_cm.o)
 
 
-    Execution Region ER_ZI (Base: 0x10000074, Size: 0x000020c4, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_ZI (Base: 0x10000074, Size: 0x0000204c, Max: 0xffffffff, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x10000074   0x0000009c   Zero   RW            7    .bss                main.o
-    0x10000110   0x00001c30   Zero   RW          440    .bss                rtx_conf_cm.o
-    0x10001d40   0x0000002c   Zero   RW          522    .bss                ssp_lpc17xx.o
-    0x10001d6c   0x00000068   Zero   RW          733    .bss                uart_lpc17xx.o
-    0x10001dd4   0x000000a0   Zero   RW          993    .bss                gpdma_lpc17xx.o
-    0x10001e74   0x00000034   Zero   RW         1840    .bss                RTX_CM3.lib(rt_task.o)
-    0x10001ea8   0x00000030   Zero   RW         2090    .bss                RTX_CM3.lib(rt_list.o)
-    0x10001ed8   0x00000060   Zero   RW         2418    .bss                c_w.l(libspace.o)
-    0x10001f38   0x00000000   Zero   RW         1159    HEAP                startup_lpc17xx.o
-    0x10001f38   0x00000200   Zero   RW         1158    STACK               startup_lpc17xx.o
+    0x10000074   0x00000024   Zero   RW            7    .bss                main.o
+    0x10000098   0x00001c30   Zero   RW          440    .bss                rtx_conf_cm.o
+    0x10001cc8   0x0000002c   Zero   RW          522    .bss                ssp_lpc17xx.o
+    0x10001cf4   0x00000068   Zero   RW          733    .bss                uart_lpc17xx.o
+    0x10001d5c   0x000000a0   Zero   RW          993    .bss                gpdma_lpc17xx.o
+    0x10001dfc   0x00000034   Zero   RW         1840    .bss                RTX_CM3.lib(rt_task.o)
+    0x10001e30   0x00000030   Zero   RW         2090    .bss                RTX_CM3.lib(rt_list.o)
+    0x10001e60   0x00000060   Zero   RW         2418    .bss                c_w.l(libspace.o)
+    0x10001ec0   0x00000000   Zero   RW         1159    HEAP                startup_lpc17xx.o
+    0x10001ec0   0x00000200   Zero   RW         1158    STACK               startup_lpc17xx.o
 
 
 ==============================================================================
@@ -2439,7 +2439,7 @@ Image component sizes
       1212         94          0          8        160       8086   gpdma_lpc17xx.o
        172         18          0          0          0       2294   gpio_lpc17xx.o
        180         12         16          0          0       2492   led_mcb1700.o
-       792        144         44         24        156      37378   main.o
+       792        144         44         24         36      37374   main.o
        252          6          0          0          0        804   pin_lpc17xx.o
        474         60          0          0          0       2896   rfid_tache.o
        126         26        104         20       7216       9155   rtx_conf_cm.o
@@ -2449,7 +2449,7 @@ Image component sizes
       6186        250        644          0        104      42120   uart_lpc17xx.o
 
     ----------------------------------------------------------------------
-     16504        864       7488         76       8192     177243   Object Totals
+     16504        864       7488         76       8072     177239   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         12          0          0          3          0          0   (incl. Padding)
 
@@ -2528,14 +2528,14 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     24148       1486       7548        116       8388     253704   Grand Totals
-     24148       1486       7548        116       8388     253704   ELF Image Totals
+     24148       1486       7548        116       8268     253700   Grand Totals
+     24148       1486       7548        116       8268     253700   ELF Image Totals
      24148       1486       7548        116          0          0   ROM Totals
 
 ==============================================================================
 
     Total RO  Size (Code + RO Data)                31696 (  30.95kB)
-    Total RW  Size (RW Data + ZI Data)              8504 (   8.30kB)
+    Total RW  Size (RW Data + ZI Data)              8384 (   8.19kB)
     Total ROM Size (Code + RO Data + RW Data)      31812 (  31.07kB)
 
 ==============================================================================

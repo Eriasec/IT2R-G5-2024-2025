@@ -22,7 +22,7 @@ typedef struct  {uint8_t choixson;}MaStructure;
 
 
 osMailQId ID_BAL;
-osMailQDef(NomBAL,16,MaStructure); 
+osMailQDef(NomBAL,1,MaStructure); 
 
  
  
@@ -49,13 +49,15 @@ void JouerSon(const void *argument){
 				0x00,
         0xEF   // End
     };
-		
+		volume_choix(0x0F);
 		
 		while(1){
+			osSignalWait(0x01,osWaitForever);
+			LED_Off(5);
 			EVretour = osMailGet(ID_BAL,osWaitForever);
 			recep=EVretour.value.p;
 			valeur_recue= recep->choixson ;
-			osMailFree(ID_BAL,recep);
+			
 		
 			
 		next1[6]=valeur_recue ;
@@ -69,18 +71,18 @@ void JouerSon(const void *argument){
 		
 		next1[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
     next1[8] = checksum & 0xFF;         // Checksum Poid faible
-		volume_choix(0x0F);
+		
 		
 	
-    osSignalWait(0x01,osWaitForever);
+    
     // Envoi de la trame via UART
-		LED_Off(5);
+		
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
     Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
 		
 		delay_ms(2000) ;
 		pause();
-		
+		osMailFree(ID_BAL,recep);
 	}
 }
 
@@ -97,7 +99,8 @@ void RFID(const void *argument) {
 	
 	while(1) {
 	  
-
+		GLCD_SetBackgroundColor(GLCD_COLOR_WHITE) ;
+		GLCD_ClearScreen();
 	
 		GLCD_SetFont(&GLCD_Font_6x8);  // & signifie "adresse de la variable"
 		GLCD_DrawString(10, 100, "trame: ");
@@ -140,9 +143,9 @@ void RFID(const void *argument) {
 		ptr=osMailAlloc(ID_BAL,osWaitForever);
 		ptr-> choixson =0x02;
 		osMailPut(ID_BAL,ptr);
-
-		osSignalSet(ID_TacheJouerSon,0x01); 
 		LED_On(5);
+		osSignalSet(ID_TacheJouerSon,0x01); 
+		osDelay(2000);
     
 		
     
@@ -151,7 +154,7 @@ void RFID(const void *argument) {
 			ptr=osMailAlloc(ID_BAL,osWaitForever);
 			ptr-> choixson =0x03;
 			osMailPut(ID_BAL,ptr);
-			osDelay(500);
+			
 		
 		osSignalSet(ID_TacheJouerSon,0x01); 
 		GLCD_SetBackgroundColor(GLCD_COLOR_RED) ;
@@ -161,9 +164,9 @@ void RFID(const void *argument) {
 		GLCD_SetFont(&GLCD_Font_16x24); // & signifie "adresse de la variable"
 		GLCD_DrawString(10, 50, "Chipeur Arrete de")   ;
 		GLCD_DrawString(10, 100, "Chiper!") ;
+		
+		
 		osDelay(500);
-		GLCD_SetBackgroundColor(GLCD_COLOR_WHITE) ;
-		GLCD_ClearScreen();
 	}
 
 }
