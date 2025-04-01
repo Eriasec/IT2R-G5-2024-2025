@@ -5,7 +5,7 @@
 #include "PIN_LPC17xx.h"                // Keil::Device:PIN
 #include "RTE_Device.h"                 // Keil::Device:Startup
                   
-//#include "GPIO_LPC17xx.h"               // Keil::Device:GPIO
+#include "GPIO_LPC17xx.h"               // Keil::Device:GPIO
                                 
 #include "Board_GLCD.h"                 // ::Board Support:Graphic LCD
 #include "GLCD_Config.h"
@@ -33,7 +33,8 @@ extern ARM_DRIVER_USART Driver_USART1;
 char a;
 char rx_buffer[20];
 char C,Z,X,Y;
-
+char C1,Z1,X1,Y1;
+unsigned char start;
 
 osThreadId ID_Receive;
 osThreadId ID_Afficher_nunchuk;
@@ -77,18 +78,18 @@ int main(void)
 
 	Init_UART();
 	
-//	InitGPIO();
-//  InitPWM(40);
-//	LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
-//  initTimer0( 999 , 499 ) ;       // PR et MR pour interuption tout les 20 ms
-//  initTimer1( 999 , 34 ) ;       // PR et MR pour interuption tout les 20 ms
+	InitGPIO();
+  InitPWM(40);
+	LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
+  initTimer0( 999 , 499 ) ;       // PR et MR pour interuption tout les 20 ms
+  initTimer1( 999 , 34 ) ;       // PR et MR pour interuption tout les 20 ms
 	
 
 	
 	
 	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
 	ID_Afficher_nunchuk = osThreadCreate(osThread(Afficher_nunchuk), NULL);
-	ID_moteur = osThreadCreate(osThread(Afficher_nunchuk), NULL);
+	ID_moteur = osThreadCreate(osThread(moteur), NULL);
 	
 	ID_GLCD=osMutexCreate(osMutex(GLCD0));
 	
@@ -155,7 +156,7 @@ void InitGPIO(void)
 {
     LPC_GPIO0->FIODIR |= (IN_A | IN_B | EN_A | EN_B);  // Configurer comme sorties
     
-//		LPC_GPIO3->FIODIR |= SERVO_PIN; // Configurer P3.26 comme sortie
+		//LPC_GPIO3->FIODIR |= SERVO_PIN; // Configurer P3.26 comme sortie
 }
 
 
@@ -220,6 +221,14 @@ void Reculer(char vitesse)
     LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
 }
 
+//void Freiner() 
+//{
+//    LPC_GPIO0-> FIOPIN |= IN_B;					// IN_B à 1 P0.17
+//		LPC_GPIO0-> FIOPIN &=~ IN_A; 				// IN_A à 0 P0.16
+//    LPC_GPIO0-> FIOPIN |= EN_A | EN_B;		// EN_A & EN_B à 1
+//    LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
+//}
+
 void DelayMs(uint32_t ms) {
 		uint32_t i ;
     for(i = 0; i < ms * 20000; i++) __NOP();
@@ -243,30 +252,46 @@ void UART_Callback(uint32_t event)
 
 
 void Receive_UART(void const *argument){
-		uint8_t rx_buffer[9];
-		char start;
+		
+		
 		while(1)
 		{
-			//osDelay(100);
+			
 			
 			osMutexWait(ID_GLCD,osWaitForever);
 
 			
 
 
+			Driver_USART1.Receive(&start, 1);		
+			osSignalWait(0x0002, osWaitForever);
+			
+			if(start ==255)
+			
+			{
 			Driver_USART1.Receive(&C, 1);			
 			osSignalWait(0x0002, osWaitForever);
+			
+			
 			Driver_USART1.Receive(&Z, 1);			
 			osSignalWait(0x0002, osWaitForever);
+			
+			
 			Driver_USART1.Receive(&X, 1);			
 			osSignalWait(0x0002, osWaitForever);
-			Driver_USART1.Receive(&Y, 1);			
-
-			osSignalWait(0x0002, osWaitForever);
 			
-		
+			
+			Driver_USART1.Receive(&Y, 1);			
+			osSignalWait(0x0002, osWaitForever);
+			}
+			else {}
+			
 			
 			osMutexRelease(ID_GLCD);
+			
+			
+
+
 		}
 }
 
@@ -276,37 +301,69 @@ char a[50];
 char b[50];
 		while(1)
 		{
+		
 		osMutexWait(ID_GLCD,osWaitForever);
-		sprintf(a,"C=%d Z=%d ",C,Z);
+		
+		
+		sprintf(a,"C=%d Z=%d S=%d ",C,Z,start);
 		sprintf(b,"X=%3d Y=%3d",X,Y);
 		GLCD_DrawString(10,10,a);
 		GLCD_DrawString(10,50,b);
 		
-		osDelay(100);
+		osDelay(10);
 		osMutexRelease(ID_GLCD);
 
 		
 		}
 }
 
-void moteur(void const *argument){
-		osDelay(osWaitForever);
-//char moteurA,moteurR;
-//		while(1)
-//		{
-//		
-//		if (Y>125)
-//		{
-//		moteurA=(Y-125);
-//		Avancer(moteurA);
-//		}
-//		if (Y<125)
-//		{
-//		moteurR=(125-Y);
-//		Reculer(moteurR);
-//		}
-
-//		
-//		}
+void moteur(void const *argument)
+{
+		char moteurA,moteurR;
+		char Y1;
+		
+				while(1)
+				{
+				
+				switch (Z)
+				{
+				case(1):
+						Avancer(100);
+						break;
+				case(0):
+				{
+						if (Y>130)
+						{
+								Y1=Y-125;
+								
+								if (Y1>70) Y1=70;
+								
+								moteurA=(Y1);
+								
+								Avancer(moteurA);
+						
+						}
+						else if (Y<110)
+						{		
+								Y1=125-Y;
+								
+								if (Y1 > 50)Y1 =50;
+								
+								moteurR=((Y1));
+								
+								Reculer(moteurR);
+						}
+						else 
+						{
+								Avancer(0);
+								
+								Reculer(0);
+						}
+						
+				break;
+				}
+				}
+				
+				}
 }
 
