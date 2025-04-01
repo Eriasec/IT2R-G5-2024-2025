@@ -39,10 +39,12 @@ unsigned char start;
 osThreadId ID_Receive;
 osThreadId ID_Afficher_nunchuk;
 osThreadId ID_moteur;
+osThreadId ID_cervo;
 
 void Receive_UART(void const * argument);
 void Afficher_nunchuk(void const * argument);
 void moteur(void const * argument);
+void cervo(void const * argument);
 
 osMutexId ID_GLCD;
 osMutexDef(GLCD0);
@@ -65,6 +67,7 @@ void UART_Callback(uint32_t event);
 osThreadDef (Receive_UART, osPriorityNormal, 1, 0);
 osThreadDef (Afficher_nunchuk, osPriorityNormal, 1, 0);
 osThreadDef (moteur, osPriorityNormal, 1, 0);
+osThreadDef (cervo, osPriorityNormal, 1, 0);
 
 int main(void)
 {
@@ -90,6 +93,7 @@ int main(void)
 	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
 	ID_Afficher_nunchuk = osThreadCreate(osThread(Afficher_nunchuk), NULL);
 	ID_moteur = osThreadCreate(osThread(moteur), NULL);
+	ID_cervo = osThreadCreate(osThread(cervo), NULL);
 	
 	ID_GLCD=osMutexCreate(osMutex(GLCD0));
 	
@@ -366,4 +370,23 @@ void moteur(void const *argument)
 				
 				}
 }
+
+void cervo(void const *argument)
+{
+		
+		char X1;
+				
+				while (1)
+				{
+					if (X>160)
+					initTimer1( 999 , 29 ) ;
+					else if (X<90)
+					initTimer1( 999 , 40 ) ;
+					else 
+					initTimer1( 999 ,  34 ) ;
+				}
+
+}
+
+
 
