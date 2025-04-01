@@ -15,17 +15,26 @@
 static uint16_t   background_color = GLCD_COLOR_RED;
 
 osThreadId ID_TacheRFID ;
-osThreadId ID_Tachenext ;
+osThreadId ID_TacheJouerSon ;
+
+typedef struct  {uint8_t choixson;}MaStructure;
 
 
+
+osMailQId ID_BAL;
+osMailQDef(NomBAL,16,MaStructure); 
 
  
  
 
 
 
-void next(const void *argument){
+void JouerSon(const void *argument){
 		
+		MaStructure *recep;
+		uint8_t valeur_recue ;
+		osEvent EVretour;
+	
 		uint16_t checksum=0 ;
     // Trame complète pour jouer le fichier 1 
     uint8_t next1[10] = {
@@ -35,11 +44,25 @@ void next(const void *argument){
         0x0F,  // choisir un dossier
         0x00,  // Pas de réponse nécessaire
         0x01,  // dossier 1
-        0x03,  // fichier 1
+        0x00,  // fichier 1
         0x00,  // Checksum à calculé
 				0x00,
         0xEF   // End
     };
+		
+		
+		while(1){
+			EVretour = osMailGet(ID_BAL,osWaitForever);
+			recep=EVretour.value.p;
+			valeur_recue= recep->choixson ;
+			osMailFree(ID_BAL,recep);
+		
+			
+		next1[6]=valeur_recue ;
+			
+			
+			
+			
 		
 		checksum =  ~(next1[1] + next1[2] + next1[3] + next1[4] + next1[5] + next1[6]) + 1;
 		
@@ -48,14 +71,16 @@ void next(const void *argument){
     next1[8] = checksum & 0xFF;         // Checksum Poid faible
 		volume_choix(0x0F);
 		
-		while(1){
+	
     osSignalWait(0x01,osWaitForever);
     // Envoi de la trame via UART
-		
+		LED_Off(5);
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
     Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
-		osDelay(30000);
+		
+		delay_ms(2000) ;
 		pause();
+		
 	}
 }
 
@@ -67,10 +92,14 @@ void RFID(const void *argument) {
   uint8_t UID_cible[4] = {0x30, 0x34, 0x31, 0x42};
   char hexStr[2];
   int hexCount =0 ;
+	MaStructure *ptr ;
 	
 	
 	while(1) {
-		
+	  
+
+	
+		GLCD_SetFont(&GLCD_Font_6x8);  // & signifie "adresse de la variable"
 		GLCD_DrawString(10, 100, "trame: ");
     GLCD_DrawString(10, 150, "UID: ");
     
@@ -108,17 +137,31 @@ void RFID(const void *argument) {
     }
     //allumage d'une led si UID trouvé : 
   if (memcmp(uid, UID_cible, 4) == 0) {
-		osSignalSet(ID_Tachenext,0x01); 
+		ptr=osMailAlloc(ID_BAL,osWaitForever);
+		ptr-> choixson =0x02;
+		osMailPut(ID_BAL,ptr);
+
+		osSignalSet(ID_TacheJouerSon,0x01); 
 		LED_On(5);
-    osDelay(20000);
+    
 		
-    LED_Off(5);
+    
   }
 	else {
+			ptr=osMailAlloc(ID_BAL,osWaitForever);
+			ptr-> choixson =0x03;
+			osMailPut(ID_BAL,ptr);
+			osDelay(500);
+		
+		osSignalSet(ID_TacheJouerSon,0x01); 
 		GLCD_SetBackgroundColor(GLCD_COLOR_RED) ;
 		GLCD_ClearScreen();
-		GLCD_DrawString(10, 200, "Chipeur Arrête de chiper!")   ;
-		osDelay(30000);
+		
+
+		GLCD_SetFont(&GLCD_Font_16x24); // & signifie "adresse de la variable"
+		GLCD_DrawString(10, 50, "Chipeur Arrete de")   ;
+		GLCD_DrawString(10, 100, "Chiper!") ;
+		osDelay(500);
 		GLCD_SetBackgroundColor(GLCD_COLOR_WHITE) ;
 		GLCD_ClearScreen();
 	}
@@ -128,7 +171,7 @@ void RFID(const void *argument) {
 
 	
 osThreadDef (RFID, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
-osThreadDef (next, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
+osThreadDef (JouerSon, osPriorityNormal, 1, 0); // 1 instance, taille pile par défaut
 
 
 
@@ -149,11 +192,11 @@ int main (void){
 	GLCD_ClearScreen();
 	GLCD_SetFont(&GLCD_Font_6x8);
 	initialise_player();
-	
+	ID_BAL= osMailCreate(osMailQ(NomBAL),NULL); 
 	
 	
 	ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
-	ID_Tachenext = osThreadCreate ( osThread ( next ), NULL ) ;
+	ID_TacheJouerSon = osThreadCreate ( osThread ( JouerSon ), NULL ) ;
 	
 	osKernelStart() ;
 	
