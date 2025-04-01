@@ -1,6 +1,6 @@
 #include "LPC17xx.h"                    // Device header
 #include "GPIO_LPC17xx.h"               // Keil::Device:GPIO
-#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
+//#include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 
 
 // Définition des broches
@@ -15,25 +15,21 @@
 #define PWM_FREQUENCY_Moteur     10000  	// 10 kHz pour le moteur
 
 // Déclarations de tâches
-void tache1 (void const * argument) ;
+//void tache1 (void const * argument) ;
 // Prototypes des fonctions
 void InitGPIO(void);
 void InitPWM(int);
 void Avancer(char vitesse);
 void Reculer(char vitesse);
-void DelayMs(unsigned int ms);
+//void DelayMs(unsigned int ms);
 
 //
-osThreadId ID_Moteur0 ;
+//osThreadId ID_Moteur0 ;
 
-// Gestion de l'état du train en fonction des capteurs
-void tache1(void const * argument)
-{
-}
-
-
-
-
+//// Gestion de l'état du train en fonction des capteurs
+//void tache1(void const * argument)
+//{
+//}
 
 
 
@@ -98,19 +94,22 @@ void Reculer(char vitesse)
 }
 
 
-osThreadDef(tache1, osPriorityNormal, 1, 0);
+//osThreadDef(tache1, osPriorityNormal, 1, 0);
 
 // Fonction principale
 int main(void) {
 
-		osKernelInitialize(); 
-    // Créer les tâches
-    ID_Moteur0 = osThreadCreate(osThread(tache1), NULL);
+//		osKernelInitialize(); 
+//    // Créer les tâches
+//    ID_Moteur0 = osThreadCreate(osThread(tache1), NULL);
     InitGPIO();
     InitPWM(40);
-
-    osKernelStart();        
-    osDelay(osWaitForever); 
+while(1)
+{
+Avancer(40);
+}
+//    osKernelStart();        
+//    osDelay(osWaitForever); 
   
 }
 

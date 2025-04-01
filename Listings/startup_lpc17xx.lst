@@ -437,9 +437,9 @@ rs\TEMP.GEII2.021\Documents\GitHub\IT2R-G5-2024-2025\RTE -IC:\Users\TEMP.GEII2.
 \ARM\CMSIS\5.6.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS
 \RTOS\RTX\INC -IC:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include -IC:\
 Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver --predefine="__RTX SETA 1" -
--predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 517" --predefine
-="_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1" --list=.\listings\startup_lpc17
-xx.lst RTE\Device\LPC1768\startup_LPC17xx.s
+-predefine="__UVISION_VERSION SETA 517" --predefine="_RTE_ SETA 1" --predefine=
+"LPC175x_6x SETA 1" --list=.\listings\startup_lpc17xx.lst RTE\Device\LPC1768\st
+artup_LPC17xx.s
 
 
 
@@ -1092,4 +1092,4 @@ Symbol: __use_two_region_memory
       None
 Comment: __use_two_region_memory unused
 3 symbols
-405 symbols in table
+404 symbols in table

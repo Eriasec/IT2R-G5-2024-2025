@@ -417,9 +417,9 @@
           <GroupName>Source Group 1</GroupName>
           <Files>
             <File>
-              <FileName>servo.c</FileName>
+              <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\servo.c</FilePath>
+              <FilePath>.\main.c</FilePath>
             </File>
           </Files>
         </Group>
