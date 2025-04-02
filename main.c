@@ -11,13 +11,16 @@
 
 // __________ Dénifintion des octets utilisés __________ \\
 
-#define LIDAR_START_HEADER 					0xA5
-#define LIDAR_RESPONSE_HEADER				0x5A
-#define LIDAR_REQUEST_RESET 				0x40
-#define LIDAR_REQUEST_STOP 					0x25
-#define LIDAR_REQUEST_SCAN					0x20
-#define LIDAR_REQUEST_FORCE_SCAN		0x21
-#define LIDAR_REQUEST_GET_INFO			0x50
+#define LIDAR_START_HEADER 						0xA5
+#define LIDAR_RESPONSE_HEADER					0x5A
+#define LIDAR_REQUEST_RESET 					0x40
+#define LIDAR_REQUEST_STOP 						0x25
+#define LIDAR_REQUEST_SCAN						0x20
+#define LIDAR_REQUEST_FORCE_SCAN			0x21
+#define LIDAR_REQUEST_GET_INFO				0x50
+
+#define TAILLE_DONNEE_RECUE						200
+#define TAILLE_DU_BUFFER_D_AFFICHAGE	120
 
 extern GLCD_FONT GLCD_Font_16x24;
 
@@ -67,7 +70,6 @@ void threadLidarUART(void const * argument) {
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
 	
-	GLCD_DrawChar(0,24,'e');
 	LIDAR_Scan();
 	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 	
@@ -83,7 +85,7 @@ void threadLidarUART(void const * argument) {
 				
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
-				Driver_USART1.Receive(t_ptr->reception, 200);
+				Driver_USART1.Receive(t_ptr->reception, TAILLE_DONNEE_RECUE);
 				osSignalWait(0x01, osWaitForever);
 				osMailPut(ID_BAL, t_ptr);
 				break;
@@ -93,39 +95,53 @@ void threadLidarUART(void const * argument) {
 
 void threadLidarTraitement(void const * agument) {
 	// Declaration des variables RTOS
-	maStructure *r_ptr;				// Pointeur vers la boite mail
-	osEvent evt;							// Event
+	maStructure *r_ptr;				// _____ Pointeur vers la boite mail _____
+	osEvent evt;							// _____ Event _____
 	
 	int i;
-	float angleMax = 0, angleMin = 360;
-	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
-	char tab[10];
+	uint16_t angle, distance, angleVeritable, distanceVeritable;
+	unsigned short x=0, y=0;
+	unsigned short holdPos[TAILLE_DU_BUFFER_D_AFFICHAGE][2];		// _____ Création d'un tableau à 2 lignes pour stoquer les anciennes valeurs des pixels posés (ligne 0 pour x et 1 pour y)_____
+	char compteur = 0;
+//	char tab[10];
 	
 	while(1) {
 		evt = osMailGet(ID_BAL,osWaitForever);
-		if(evt.status == osEventMail) {
+		if(evt.status == osEventMail) {						// _____ Attente de la reception du mail _____
 			r_ptr = evt.value.p;
-			for(i=0; i<200; i+=5) {
-				if(r_ptr->reception[i] == 0x3E) {
+			GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
+			for(i=0; i<TAILLE_DONNEE_RECUE; i+=5) {									// _____ On explore les trames receptionnées _____
+				if(r_ptr->reception[i] == 0x3E) {			// _____ Si la qualité du laser n'est pas suffisante on ignore la trame _____
 					angle = 		(r_ptr->reception[i+1] & 0xFE	) >> 1;		// _____ Octets 0 a  6 de l'angle _____
 					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
-					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
-					distanceVeritable = (distance >> 2) - 100;					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
-					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
-					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
-					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// calcul de la composante en y (+120 pour afficher au milieu)
+					angleVeritable = angle >> 6;												// _____ Division par 64 pour obtenir le vrai angle _____
+					distanceVeritable = (distance >> 2) - 100;					// _____ Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse _____
+					distanceVeritable = distanceVeritable >> 2;					// _____ Mise a l'echelle _____
+					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// _____ calcul de la composante en x (+160 pour afficher au milieu) _____
+					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// _____ calcul de la composante en y (+120 pour afficher au milieu) _____
+					// _____ On empêche les valeurs de dépasser la taille de l'écran _____
 					if(y > 240) {
 						y = 240;
-					}
-					if(x > 320) {
+					} if(x > 320) {
 						x = 320;
 					}
 					
-					GLCD_DrawPixel(x,y);
+					GLCD_DrawPixel(x,y);			// _____ On dessine les points pour représenter les objets alentours _____
+					holdPos[i + (compteur * 40)][0] = x;
+					holdPos[i + (compteur * 40)][1] = y;
+					compteur++;
 				}
 			}
+			
+//			if(compteur >= (TAILLE_DU_BUFFER_D_AFFICHAGE / 40)) {
+//				compteur = 0;
+//				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);
+//				for(i=0; i<TAILLE_DU_BUFFER_D_AFFICHAGE; i++) {
+//					GLCD_DrawPixel(holdPos[i][0], holdPos[i][1]);			// _____ On efface l'ancien pixel _____
+//				}
+//			}
 			osMailFree(ID_BAL, r_ptr);
 		}
 	}
