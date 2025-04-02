@@ -11,16 +11,19 @@
 
 // __________ Dénifintion des octets utilisés __________ \\
 
-#define LIDAR_START_HEADER 						0xA5
-#define LIDAR_RESPONSE_HEADER					0x5A
-#define LIDAR_REQUEST_RESET 					0x40
-#define LIDAR_REQUEST_STOP 						0x25
-#define LIDAR_REQUEST_SCAN						0x20
-#define LIDAR_REQUEST_FORCE_SCAN			0x21
-#define LIDAR_REQUEST_GET_INFO				0x50
+#define LIDAR_START_HEADER 					0xA5
+#define LIDAR_RESPONSE_HEADER				0x5A
+#define LIDAR_REQUEST_RESET 				0x40
+#define LIDAR_REQUEST_STOP 					0x25
+#define LIDAR_REQUEST_SCAN					0x20
+#define LIDAR_REQUEST_FORCE_SCAN		0x21
+#define LIDAR_REQUEST_GET_INFO			0x50
 
-#define TAILLE_DONNEE_RECUE						200
-#define TAILLE_DU_BUFFER_D_AFFICHAGE	120
+#define TAILLE_BUFFER_RECEPTION			200
+#define TAILLE_TRAME								5
+#define N_TRAMES_BUFFER_RECEPTION		TAILLE_BUFFER_RECEPTION / TAILLE_TRAME
+#define TAILLE_BUFFER_AFFICHAGE			N_TRAMES_BUFFER_RECEPTION * 4
+
 
 extern GLCD_FONT GLCD_Font_16x24;
 
@@ -36,7 +39,6 @@ void LIDAR_Stop(void);
 void LIDAR_Get_Info(void);		// Récupère les infos du lidar **Pour on ne lit pas les données renvoyées**
 void LIDAR_Scan(void);
 void LIDAR_Force_Scan(void);
-void LIDAR_Attente_Header(void);
 
 // __________ Prototypes Callback __________ \\
 
@@ -70,6 +72,10 @@ void threadLidarUART(void const * argument) {
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
 	
+//	LIDAR_Reset();
+//	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
+//	osDelay(1000);
+	
 	LIDAR_Scan();
 	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 	
@@ -85,7 +91,7 @@ void threadLidarUART(void const * argument) {
 				
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
-				Driver_USART1.Receive(t_ptr->reception, TAILLE_DONNEE_RECUE);
+				Driver_USART1.Receive(t_ptr->reception, TAILLE_BUFFER_RECEPTION);
 				osSignalWait(0x01, osWaitForever);
 				osMailPut(ID_BAL, t_ptr);
 				break;
@@ -93,15 +99,20 @@ void threadLidarUART(void const * argument) {
 	}
 }
 
+
+
+
+
 void threadLidarTraitement(void const * agument) {
-	// Declaration des variables RTOS
+	// Declaration des variables RTOS _____ //
 	maStructure *r_ptr;				// _____ Pointeur vers la boite mail _____
 	osEvent evt;							// _____ Event _____
 	
-	int i;
+	// _____ Declaration des variables _____ //
+	int i, j;
 	uint16_t angle, distance, angleVeritable, distanceVeritable;
 	unsigned short x=0, y=0;
-	unsigned short holdPos[TAILLE_DU_BUFFER_D_AFFICHAGE][2];		// _____ Création d'un tableau à 2 lignes pour stoquer les anciennes valeurs des pixels posés (ligne 0 pour x et 1 pour y)_____
+	unsigned short holdX[TAILLE_BUFFER_AFFICHAGE], holdY[TAILLE_BUFFER_AFFICHAGE];		// _____ Création d'un tableau à 2 lignes pour stoquer les anciennes valeurs des pixels posés (ligne 0 pour x et 1 pour y)_____
 	char compteur = 0;
 //	char tab[10];
 	
@@ -109,8 +120,9 @@ void threadLidarTraitement(void const * agument) {
 		evt = osMailGet(ID_BAL,osWaitForever);
 		if(evt.status == osEventMail) {						// _____ Attente de la reception du mail _____
 			r_ptr = evt.value.p;
-			GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
-			for(i=0; i<TAILLE_DONNEE_RECUE; i+=5) {									// _____ On explore les trames receptionnées _____
+			j = 0;
+			
+			for(i=0; i < TAILLE_BUFFER_RECEPTION; i += TAILLE_TRAME) {									// _____ On explore les trames receptionnées _____
 				if(r_ptr->reception[i] == 0x3E) {			// _____ Si la qualité du laser n'est pas suffisante on ignore la trame _____
 					angle = 		(r_ptr->reception[i+1] & 0xFE	) >> 1;		// _____ Octets 0 a  6 de l'angle _____
 					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
@@ -128,21 +140,24 @@ void threadLidarTraitement(void const * agument) {
 						x = 320;
 					}
 					
+					GLCD_SetForegroundColor(GLCD_COLOR_WHITE);
+//					GLCD_DrawPixel(	holdX	[j + (((compteur+3)&0x03) * N_TRAMES_BUFFER_RECEPTION)],
+//													holdY [j + (((compteur+3)&0x03) * N_TRAMES_BUFFER_RECEPTION)]);
+					GLCD_DrawPixel(	holdX	[j],
+													holdY [j]);
+					
+					GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 					GLCD_DrawPixel(x,y);			// _____ On dessine les points pour représenter les objets alentours _____
-					holdPos[i + (compteur * 40)][0] = x;
-					holdPos[i + (compteur * 40)][1] = y;
-					compteur++;
+					holdX[j + (compteur * N_TRAMES_BUFFER_RECEPTION)] = x;
+					holdY[j + (compteur * N_TRAMES_BUFFER_RECEPTION)] = y;
+					j += 1;
 				}
 			}
 			
-//			if(compteur >= (TAILLE_DU_BUFFER_D_AFFICHAGE / 40)) {
-//				compteur = 0;
-//				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);
-//				for(i=0; i<TAILLE_DU_BUFFER_D_AFFICHAGE; i++) {
-//					GLCD_DrawPixel(holdPos[i][0], holdPos[i][1]);			// _____ On efface l'ancien pixel _____
-//				}
-//			}
-			osMailFree(ID_BAL, r_ptr);
+			compteur += 1;			// ----- ?? "compteur++" ne fonctionne pas ?? -----
+			compteur &= 0x03;
+			
+			osMailFree(ID_BAL, r_ptr);			// _____ On libère la case de la boite mail qu'on vient de vider _____
 		}
 	}
 }
@@ -163,6 +178,8 @@ osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 // __________ Main __________ \\
 
 int main(void) {
+	int i,j;
+	char tab[10];
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
 	ID_ThreadLidarUART = osThreadCreate(osThread(threadLidarUART), NULL);
@@ -170,7 +187,7 @@ int main(void) {
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
-	InitPWM(600);					
+	InitPWM(600);
 	
 	// _____ Initialisation du GLCD _____
 	GLCD_Initialize();
@@ -178,7 +195,13 @@ int main(void) {
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 	GLCD_ClearScreen();
-	GLCD_DrawChar(304,216,'i');
+	sprintf(tab, "%4d %4d", N_TRAMES_BUFFER_RECEPTION, TAILLE_BUFFER_AFFICHAGE);
+	GLCD_DrawString(0, 0, tab);
+	for(i=0; i<3; i++) {
+		for(j=0; j<3; j++) {
+			GLCD_DrawPixel(i+159, j+119);
+		}
+	}
 	
 	// _____ Lancement RTOS _____
 	osKernelStart();
