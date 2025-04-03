@@ -14,5 +14,5 @@
 .\objects\i2c_lpc17xx.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_I2C.h
 .\objects\i2c_lpc17xx.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_Common.h
 .\objects\i2c_lpc17xx.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-.\objects\i2c_lpc17xx.o: U:\ESE_S4\Moteur + Bluethooth\RTE\Device\LPC1768\RTE_Device.h
-.\objects\i2c_lpc17xx.o: U:\ESE_S4\Moteur + Bluethooth\RTE\RTE_Components.h
+.\objects\i2c_lpc17xx.o: U:\ESE_S4\Moteur + BT V2\IT2R-G5-2024-2025-moduleBT-receive-PWM\IT2R-G5-2024-2025-moduleBT-receive-PWM\RTE\Device\LPC1768\RTE_Device.h
+.\objects\i2c_lpc17xx.o: U:\ESE_S4\Moteur + BT V2\IT2R-G5-2024-2025-moduleBT-receive-PWM\IT2R-G5-2024-2025-moduleBT-receive-PWM\RTE\RTE_Components.h

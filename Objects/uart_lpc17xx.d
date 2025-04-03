@@ -14,5 +14,5 @@
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include\system_LPC17xx.h
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h
 .\objects\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPDMA_LPC17xx.h
-.\objects\uart_lpc17xx.o: U:\ESE_S4\Moteur + Bluethooth\RTE\Device\LPC1768\RTE_Device.h
-.\objects\uart_lpc17xx.o: U:\ESE_S4\Moteur + Bluethooth\RTE\RTE_Components.h
+.\objects\uart_lpc17xx.o: U:\ESE_S4\Moteur + BT V2\IT2R-G5-2024-2025-moduleBT-receive-PWM\IT2R-G5-2024-2025-moduleBT-receive-PWM\RTE\Device\LPC1768\RTE_Device.h
+.\objects\uart_lpc17xx.o: U:\ESE_S4\Moteur + BT V2\IT2R-G5-2024-2025-moduleBT-receive-PWM\IT2R-G5-2024-2025-moduleBT-receive-PWM\RTE\RTE_Components.h

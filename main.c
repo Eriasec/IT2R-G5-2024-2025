@@ -19,7 +19,7 @@
 #define EN_A       (1 << 19)  // GPIO P0.19 
 #define EN_B       (1 << 18)  // GPIO P0.18 
 #define PWM_PIN    (1 << 25)  // GPIO P3.25 (PWM Moteur)
-#define PWM_Servo (1<<26)  // GPIO P3.26
+#define PWM_Servo  (1 << 26)  // GPIO P3.26
 
 // Configuration du PWM
 #define PWM_FREQUENCY_Moteur     10000  	// 10 kHz pour le moteur
@@ -32,8 +32,9 @@ extern ARM_DRIVER_USART Driver_USART1;
 
 char a;
 char rx_buffer[20];
-char C,Z,X,Y;
+unsigned char C=0,Z=0,X,Y=125;
 char C1,Z1,X1,Y1;
+unsigned char direction=29;
 unsigned char start;
 
 osThreadId ID_Receive;
@@ -64,7 +65,7 @@ void UART_Callback(uint32_t event);
 
 
 
-osThreadDef (Receive_UART, osPriorityNormal, 1, 0);
+osThreadDef (Receive_UART, osPriorityHigh, 1, 0);
 osThreadDef (Afficher_nunchuk, osPriorityNormal, 1, 0);
 osThreadDef (moteur, osPriorityNormal, 1, 0);
 osThreadDef (cervo, osPriorityNormal, 1, 0);
@@ -82,7 +83,7 @@ int main(void)
 	Init_UART();
 	
 	InitGPIO();
-  InitPWM(40);
+  InitPWM(80);
 	LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
   initTimer0( 999 , 499 ) ;       // PR et MR pour interuption tout les 20 ms
   initTimer1( 999 , 34 ) ;       // PR et MR pour interuption tout les 20 ms
@@ -145,8 +146,8 @@ void initTimer1 (int prescaler, int match)
   LPC_TIM1->PR = prescaler;                // Prescaler PR
   LPC_TIM1->MR0 = match;                   // valeur de MR
   LPC_TIM1->MCR = LPC_TIM1->MCR | (3<<0); // RAZ du compteur + interruption
-  
-  NVIC_SetPriority(TIMER1_IRQn,0);        // TIMER0 (IRQ1) : interruption de priorité 0
+  LPC_TIM1->TCR = 1 ;                     // Lancement Timer
+  NVIC_SetPriority(TIMER1_IRQn,1);        // TIMER0 (IRQ1) : interruption de priorité 0
   NVIC_EnableIRQ(TIMER1_IRQn);            // active les interruptions TIMER0
 }
 
@@ -299,31 +300,31 @@ void Receive_UART(void const *argument){
 		}
 }
 
-void Afficher_nunchuk(void const *argument){
-		
-char a[50];
-char b[50];
-		while(1)
-		{
-		
-		osMutexWait(ID_GLCD,osWaitForever);
-		
-		
-		sprintf(a,"C=%d Z=%d S=%d ",C,Z,start);
-		sprintf(b,"X=%3d Y=%3d",X,Y);
-		GLCD_DrawString(10,10,a);
-		GLCD_DrawString(10,50,b);
-		
-		osDelay(10);
-		osMutexRelease(ID_GLCD);
+void Afficher_nunchuk(void const *argument){ // à optimisé pour plutard
+		osDelay(osWaitForever);
+//char a[50];
+//char b[50];
+//		while(1)
+//		{
+//		
+//		osMutexWait(ID_GLCD,osWaitForever);
+//		
+//		
+//		sprintf(a,"C=%d Z=%d S=%d ",C,Z,start);
+//		sprintf(b,"X=%3d Y=%3d d=%d",X,Y,direction);
+//		GLCD_DrawString(10,10,a);
+//		GLCD_DrawString(10,50,b);
+//		
+//		osDelay(10);
+//		osMutexRelease(ID_GLCD);
 
-		
-		}
+//		
+//		}
 }
 
 void moteur(void const *argument)
 {
-		char moteurA,moteurR;
+		char moteurA=0,moteurR=0;
 		char Y1;
 		
 				while(1)
@@ -374,17 +375,24 @@ void moteur(void const *argument)
 void cervo(void const *argument)
 {
 		
-		char X1;
+
 				
 				while (1)
 				{
-					if (X>160)
-					initTimer1( 999 , 29 ) ;
-					else if (X<90)
-					initTimer1( 999 , 40 ) ;
+					
+
+					if (X>160)		
+							initTimer1 (999	, 29 ) ;	
+					
+					else if (X<90)	
+							initTimer1 (999	, 40 ) ;
+					
 					else 
-					initTimer1( 999 ,  34 ) ;
-				}
+							initTimer1 (999	, 34 ) ;
+
+
+					
+    		}
 
 }
 
