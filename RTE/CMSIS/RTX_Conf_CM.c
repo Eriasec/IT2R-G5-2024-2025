@@ -6,25 +6,35 @@
  *      Rev.:    V4.70.1
  *----------------------------------------------------------------------------
  *
- * Copyright (c) 1999-2009 KEIL, 2009-2016 ARM Germany GmbH. All rights reserved.
+ * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  - Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  - Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  - Neither the name of ARM  nor the names of its contributors may be used 
+ *    to endorse or promote products derived from this software without 
+ *    specific prior written permission.
  *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the License); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an AS IS BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *---------------------------------------------------------------------------*/
  
 #include "cmsis_os.h"
- 
+#include "stdio.h" 
+#include "GUI.h"
 
 /*----------------------------------------------------------------------------
  *      RTX User configuration part BEGIN
@@ -39,35 +49,35 @@
 //   <i> Defines max. number of user threads that will run at the same time.
 //   <i> Default: 6
 #ifndef OS_TASKCNT
- #define OS_TASKCNT     6
+ #define OS_TASKCNT     4
 #endif
  
 //   <o>Default Thread stack size [bytes] <64-4096:8><#/4>
 //   <i> Defines default stack size for threads with osThreadDef stacksz = 0
 //   <i> Default: 200
 #ifndef OS_STKSIZE
- #define OS_STKSIZE     500      // this stack size value is in words
+ #define OS_STKSIZE     256      // this stack size value is in words
 #endif
  
 //   <o>Main Thread stack size [bytes] <64-32768:8><#/4>
 //   <i> Defines stack size for main thread.
 //   <i> Default: 200
 #ifndef OS_MAINSTKSIZE
- #define OS_MAINSTKSIZE 500      // this stack size value is in words
+ #define OS_MAINSTKSIZE 512     // this stack size value is in words
 #endif
  
 //   <o>Number of threads with user-provided stack size <0-250>
 //   <i> Defines the number of threads with user-provided stack size.
 //   <i> Default: 0
 #ifndef OS_PRIVCNT
- #define OS_PRIVCNT     0
+ #define OS_PRIVCNT     2
 #endif
  
 //   <o>Total stack size [bytes] for threads with user-provided stack size <0-1048576:8><#/4>
 //   <i> Defines the combined stack size for threads with user-provided stack size.
 //   <i> Default: 0
 #ifndef OS_PRIVSTKSIZE
- #define OS_PRIVSTKSIZE 0       // this stack size value is in words
+ #define OS_PRIVSTKSIZE 1024       // this stack size value is in words
 #endif
  
 //   <q>Stack overflow checking
@@ -108,7 +118,7 @@
 //   <i> When the Cortex-M SysTick timer is used, the input clock 
 //   <i> is on most systems identical with the core clock.
 #ifndef OS_CLOCK
- #define OS_CLOCK       100000000
+ #define OS_CLOCK       200000000
 #endif
  
 //   <o>RTX Timer tick interval value [us] <1-1000000>
@@ -163,14 +173,14 @@
 //   <i> Defines stack size for Timer thread.
 //   <i> Default: 200
 #ifndef OS_TIMERSTKSZ
- #define OS_TIMERSTKSZ  50     // this stack size value is in words
+ #define OS_TIMERSTKSZ  256     // this stack size value is in words
 #endif
  
 //   <o>Timer Callback Queue size <1-32>
 //   <i> Number of concurrent active timer callback functions.
 //   <i> Default: 4
 #ifndef OS_TIMERCBQS
- #define OS_TIMERCBQS   4
+ #define OS_TIMERCBQS   16
 #endif
  
 // </e>
@@ -270,25 +280,28 @@ extern osThreadId svcThreadGetId (void);
 /// \brief Called when a runtime error is detected
 /// \param[in]   error_code   actual error code that has been detected
 void os_error (uint32_t error_code) {
- 
+ char texte[50];
   /* HERE: include optional code to be executed on runtime error. */
   switch (error_code) {
     case OS_ERROR_STACK_OVF:
       /* Stack overflow detected for the currently running task. */
       /* Thread can be identified by calling svcThreadGetId().   */
+			sprintf (texte, "erreur stack OV             ");
       break;
     case OS_ERROR_FIFO_OVF:
       /* ISR FIFO Queue buffer overflow detected. */
+			sprintf (texte, " fifo OV             ");
       break;
     case OS_ERROR_MBX_OVF:
       /* Mailbox overflow detected. */
+			sprintf (texte, " Mailbox OV              ");
       break;
     case OS_ERROR_TIMER_OVF:
       /* User Timer Callback Queue overflow detected. */
-      break;
-    default:
+			sprintf (texte, " Timer OV            ");
       break;
   }
+	GUI_DispStringAt(texte , 5, 210);
   for (;;);
 }
  

@@ -1,0 +1,39 @@
+ case ID_BUTTON_0: // Notifications sent by 'Droite'
+      switch(NCode) {
+      case WM_NOTIFICATION_CLICKED:
+        // USER START (Optionally insert code for reacting on notification message)
+		hItem = WM_GetDialogItem(pMsg->hWin, ID_IMAGE_0);
+    pData = _GetImageById(ID_IMAGE_0_IMAGE_0, &FileSize);
+    IMAGE_SetBMP(hItem, pData, FileSize);
+        // USER END
+        break;
+      case WM_NOTIFICATION_RELEASED:
+        // USER START (Optionally insert code for reacting on notification message)
+        // USER END
+        break;
+      // USER START (Optionally insert additional code for further notification handling)
+      // USER END
+      }
+      break;
+    case ID_BUTTON_1: // Notifications sent by 'Gauche'
+      switch(NCode) {
+      case WM_NOTIFICATION_CLICKED:
+        // USER START (Optionally insert code for reacting on notification message)
+		hItem = WM_GetDialogItem(pMsg->hWin, ID_IMAGE_1);
+    pData = _GetImageById(ID_IMAGE_1_IMAGE_0, &FileSize);
+    IMAGE_SetBMP(hItem, pData, FileSize);
+        // USER END
+        break;
+      case WM_NOTIFICATION_RELEASED:
+        // USER START (Optionally insert code for reacting on notification message)
+			
+        // USER END
+        break;
+      // USER START (Optionally insert additional code for further notification handling)
+      // USER END
+      }
+      break;
+    // USER START (Optionally insert additional code for further Ids)
+    // USER END
+    }
+    break;
