@@ -14,8 +14,8 @@
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include\system_LPC17xx.h
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPDMA_LPC17xx.h
-.\main.o: C:\Users\TEMP.GEII2.042\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
-.\main.o: C:\Users\TEMP.GEII2.042\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
+.\main.o: C:\Users\TEMP.GEII2.021\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
+.\main.o: C:\Users\TEMP.GEII2.021\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
 .\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\main.o: C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board\Board_GLCD.h

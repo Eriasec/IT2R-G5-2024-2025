@@ -19,12 +19,6 @@
 #define LIDAR_REQUEST_FORCE_SCAN		0x21
 #define LIDAR_REQUEST_GET_INFO			0x50
 
-#define TAILLE_BUFFER_RECEPTION			200
-#define TAILLE_TRAME								5
-#define N_TRAMES_BUFFER_RECEPTION		TAILLE_BUFFER_RECEPTION / TAILLE_TRAME
-#define TAILLE_BUFFER_AFFICHAGE			N_TRAMES_BUFFER_RECEPTION * 4
-
-
 extern GLCD_FONT GLCD_Font_16x24;
 
 // __________ Prototypes Fonctions UART __________ 
@@ -32,6 +26,7 @@ void Init_UART1(void);
 
 // __________ Prototypes Fonctions PWM __________ 
 void InitPWM(int alpha);
+void InitTimer(int prescaler, int match);
 
 // __________ Prototypes Fonctions LIDAR __________ 
 void LIDAR_Reset(void);
@@ -39,6 +34,7 @@ void LIDAR_Stop(void);
 void LIDAR_Get_Info(void);		// Récupère les infos du lidar **Pour on ne lit pas les données renvoyées**
 void LIDAR_Scan(void);
 void LIDAR_Force_Scan(void);
+void LIDAR_Attente_Header(void);
 
 // __________ Prototypes Callback __________ \\
 
@@ -48,6 +44,7 @@ void callbackUSART(uint32_t event);
 
 osThreadId ID_ThreadLidarUART;
 osThreadId ID_ThreadLidarTraitement;
+osThreadId ID_ThreadClearScreen;
 
 // __________ Variables globales __________ \\
 
@@ -58,7 +55,12 @@ typedef struct {
 // __________ OS MailBox __________ \\
 
 osMailQId ID_BAL;
-osMailQDef(BAL_Reception, 3, maStructure);
+osMailQDef(BAL_Reception, 5, maStructure);
+
+// __________ OS MailBox __________ \\
+
+osMutexId ID_mut_GLCD;
+osMutexDef(mut_GLCD);
 
 
 
@@ -72,10 +74,7 @@ void threadLidarUART(void const * argument) {
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
 	
-//	LIDAR_Reset();
-//	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
-//	osDelay(1000);
-	
+	GLCD_DrawChar(0,24,'e');
 	LIDAR_Scan();
 	osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 	
@@ -91,7 +90,7 @@ void threadLidarUART(void const * argument) {
 				
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
-				Driver_USART1.Receive(t_ptr->reception, TAILLE_BUFFER_RECEPTION);
+				Driver_USART1.Receive(t_ptr->reception, 200);
 				osSignalWait(0x01, osWaitForever);
 				osMailPut(ID_BAL, t_ptr);
 				break;
@@ -99,76 +98,69 @@ void threadLidarUART(void const * argument) {
 	}
 }
 
-
-
-
-
 void threadLidarTraitement(void const * agument) {
-	// Declaration des variables RTOS _____ //
-	maStructure *r_ptr;				// _____ Pointeur vers la boite mail _____
-	osEvent evt;							// _____ Event _____
+	// Declaration des variables RTOS
+	maStructure *r_ptr;				// Pointeur vers la boite mail
+	osEvent evt;							// Event
 	
-	// _____ Declaration des variables _____ //
-	int i, j;
-	uint16_t angle, distance, angleVeritable, distanceVeritable;
-	unsigned short x=0, y=0;
-	unsigned short holdX[TAILLE_BUFFER_AFFICHAGE], holdY[TAILLE_BUFFER_AFFICHAGE];		// _____ Création d'un tableau à 2 lignes pour stoquer les anciennes valeurs des pixels posés (ligne 0 pour x et 1 pour y)_____
-	char compteur = 0;
+	int i;
+//	float angleMax = 0, angleMin = 360;
+	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
 //	char tab[10];
 	
 	while(1) {
 		evt = osMailGet(ID_BAL,osWaitForever);
-		if(evt.status == osEventMail) {						// _____ Attente de la reception du mail _____
+		if(evt.status == osEventMail) {
 			r_ptr = evt.value.p;
-			j = 0;
-			
-			for(i=0; i < TAILLE_BUFFER_RECEPTION; i += TAILLE_TRAME) {									// _____ On explore les trames receptionnées _____
-				if(r_ptr->reception[i] == 0x3E) {			// _____ Si la qualité du laser n'est pas suffisante on ignore la trame _____
+			for(i=0; i<200; i+=5) {
+				if(r_ptr->reception[i] == 0x3E) {
 					angle = 		(r_ptr->reception[i+1] & 0xFE	) >> 1;		// _____ Octets 0 a  6 de l'angle _____
 					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
-					angleVeritable = angle >> 6;												// _____ Division par 64 pour obtenir le vrai angle _____
-					distanceVeritable = (distance >> 2) - 100;					// _____ Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse _____
-					distanceVeritable = distanceVeritable >> 2;					// _____ Mise a l'echelle _____
-					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// _____ calcul de la composante en x (+160 pour afficher au milieu) _____
-					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// _____ calcul de la composante en y (+120 pour afficher au milieu) _____
-					// _____ On empêche les valeurs de dépasser la taille de l'écran _____
+					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
+					distanceVeritable = (distance >> 2) - 100;					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
+					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
+					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
+					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// calcul de la composante en y (+120 pour afficher au milieu)
 					if(y > 240) {
 						y = 240;
-					} if(x > 320) {
+					}
+					if(x > 320) {
 						x = 320;
 					}
 					
-					GLCD_SetForegroundColor(GLCD_COLOR_WHITE);
-//					GLCD_DrawPixel(	holdX	[j + (((compteur+3)&0x03) * N_TRAMES_BUFFER_RECEPTION)],
-//													holdY [j + (((compteur+3)&0x03) * N_TRAMES_BUFFER_RECEPTION)]);
-					GLCD_DrawPixel(	holdX	[j],
-													holdY [j]);
-					
-					GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
-					GLCD_DrawPixel(x,y);			// _____ On dessine les points pour représenter les objets alentours _____
-					holdX[j + (compteur * N_TRAMES_BUFFER_RECEPTION)] = x;
-					holdY[j + (compteur * N_TRAMES_BUFFER_RECEPTION)] = y;
-					j += 1;
+					osMutexWait(ID_mut_GLCD, osWaitForever);
+					GLCD_DrawPixel(x,y);
+					osMutexRelease(ID_mut_GLCD);
 				}
 			}
-			
-			compteur += 1;			// ----- ?? "compteur++" ne fonctionne pas ?? -----
-			compteur &= 0x03;
-			
-			osMailFree(ID_BAL, r_ptr);			// _____ On libère la case de la boite mail qu'on vient de vider _____
+			osMailFree(ID_BAL, r_ptr);
 		}
 	}
 }
 
-
+void threadClearScreen(void const * argument) {
+	int i, j;
+	while(1) {
+		osDelay(10000);
+		osMutexWait(ID_mut_GLCD, osWaitForever);
+		GLCD_ClearScreen();
+		for(i=0; i<3; i++) {
+			for(j=0; j<3; j++) {
+				GLCD_DrawPixel(i+159, j+119);
+			}
+		}
+		osMutexRelease(ID_mut_GLCD);
+	}
+}
 
 
 // __________ OS Thread Def __________ \\
 
-osThreadDef(threadLidarUART, osPriorityAboveNormal, 1, 0);		
-osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);			
+osThreadDef(threadLidarUART, osPriorityRealtime, 1, 0);		
+osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);	 
+osThreadDef(threadClearScreen, osPriorityAboveNormal, 1, 0);
 
 
 
@@ -179,15 +171,18 @@ osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);
 
 int main(void) {
 	int i,j;
-	char tab[10];
 	// _____ Initialisation des threads _____
 	osKernelInitialize();
 	ID_ThreadLidarUART = osThreadCreate(osThread(threadLidarUART), NULL);
 	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
+	ID_ThreadClearScreen = osThreadCreate(osThread(threadClearScreen), NULL);
+	
+	ID_mut_GLCD = osMutexCreate(osMutex(mut_GLCD));
 	
 	// _____ Initialisation de l'UART _____
 	Init_UART1();
 	InitPWM(600);
+//	InitTimer(9999,12499);
 	
 	// _____ Initialisation du GLCD _____
 	GLCD_Initialize();
@@ -195,8 +190,6 @@ int main(void) {
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 	GLCD_ClearScreen();
-	sprintf(tab, "%4d %4d", N_TRAMES_BUFFER_RECEPTION, TAILLE_BUFFER_AFFICHAGE);
-	GLCD_DrawString(0, 0, tab);
 	for(i=0; i<3; i++) {
 		for(j=0; j<3; j++) {
 			GLCD_DrawPixel(i+159, j+119);
@@ -262,6 +255,24 @@ void InitPWM(int alpha) {
 
 		LPC_PWM1->TCR = 1;  /*validation de timer  et reset counter */
 }
+
+// __________ Fonctions TIMER (pour clearscreen) __________ \\
+
+//void InitTimer(int prescaler, int match) {	//Configuration du TIMER0
+//  LPC_TIM0->PR = prescaler;                	// Prescaler PR
+//  LPC_TIM0->MR0 = match;                   	// valeur de MR
+//  LPC_TIM0->MCR = LPC_TIM0->MCR | (3<<0); 	// RAZ du compteur + interruption
+//  LPC_TIM0->TCR = 1 ;                     	// Lancement Timer
+//  
+//  //Configuration Interuption sur TIMER0
+//  NVIC_SetPriority(TIMER0_IRQn,0);        	// TIMER0 (IRQ1) : interruption de priorité 0
+//  NVIC_EnableIRQ(TIMER0_IRQn);            	// active les interruptions TIMER0
+//}
+
+//void TIMER1_IRQHandler(void) { 			// Fonction d'interruption sur TIMER1
+//  LPC_TIM1->IR = (1<<0); 				//baisse le drapeau dû à MR0
+//	osSignalSet(ID_ThreadClearScreen, 0x0001);
+//}
 
 // __________ Fonctions LIDAR __________ \\
 

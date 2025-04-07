@@ -14,7 +14,7 @@
 .\ssp_lpc17xx.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_SPI.h
 .\ssp_lpc17xx.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Driver\Include\Driver_Common.h
 .\ssp_lpc17xx.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-.\ssp_lpc17xx.o: C:\Users\TEMP.GEII2.042\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
-.\ssp_lpc17xx.o: C:\Users\TEMP.GEII2.042\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
+.\ssp_lpc17xx.o: C:\Users\TEMP.GEII2.021\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
+.\ssp_lpc17xx.o: C:\Users\TEMP.GEII2.021\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
 .\ssp_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPIO_LPC17xx.h
 .\ssp_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPDMA_LPC17xx.h
