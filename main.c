@@ -3,10 +3,8 @@
 #include "Driver_USART.h"               // ARM::CMSIS Driver:USART:Custom
 #include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 #include "PIN_LPC17xx.h"                // Keil::Device:PIN
-#include "RTE_Device.h"                 // Keil::Device:Startup
-                  
-#include "GPIO_LPC17xx.h"               // Keil::Device:GPIO
-                                
+#include "RTE_Device.h"                 // Keil::Device:Startup               
+#include "GPIO_LPC17xx.h"               // Keil::Device:GPIO                         
 #include "Board_GLCD.h"                 // ::Board Support:Graphic LCD
 #include "GLCD_Config.h"
 #include <stdio.h>
@@ -56,8 +54,8 @@ void InitPWM(int);
 void Avancer(char vitesse);
 void Reculer(char vitesse);
 void DelayMs(unsigned int ms);
-void initTimer0 (int prescaler, int match);
-void initTimer1 (int prescaler, int match);
+void initTimer0 ( int match );
+
 
 void Init_UART(void);
 void UART_Callback(uint32_t event);
@@ -81,20 +79,20 @@ int main(void)
 	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
 
 	Init_UART();
-	
 	InitGPIO();
-  InitPWM(80);
+  InitPWM(70);
 	LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
-  initTimer0( 999 , 499 ) ;       // PR et MR pour interuption tout les 20 ms
-  initTimer1( 999 , 34 ) ;       // PR et MR pour interuption tout les 20 ms
+	
+  initTimer0( 14 ) ;       // PR et MR pour interuption tout les 20 ms
+  
 	
 
 	
 	
 	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
+	ID_cervo = osThreadCreate(osThread(cervo), NULL);
 	ID_Afficher_nunchuk = osThreadCreate(osThread(Afficher_nunchuk), NULL);
 	ID_moteur = osThreadCreate(osThread(moteur), NULL);
-	ID_cervo = osThreadCreate(osThread(cervo), NULL);
 	
 	ID_GLCD=osMutexCreate(osMutex(GLCD0));
 	
@@ -119,36 +117,36 @@ void Init_UART(void){
 	Driver_USART1.Control(ARM_USART_CONTROL_TX,1);
 	Driver_USART1.Control(ARM_USART_CONTROL_RX,1);
 }
-void TIMER0_IRQHandler(void) // Attention à bien nommer la fonction !
+
+//////////Fonction d'interruption /////////////////////////////////////////////////////
+void TIMER0_IRQHandler(void) 			// Fonction d'interruption sur TIMER0
 {
-  LPC_TIM0->IR = (1<<0); //baisse le drapeau dû à MR0
-  LPC_GPIO3->FIOPIN |= PWM_Servo;     //inverse l’état de P3.26
-  LPC_TIM1->TCR = 1 ;                     // Lancement Timer 1 au debut de Timer 0
-}
-void TIMER1_IRQHandler(void) // Attention à bien nommer la fonction !
-{
-  LPC_TIM1->IR = (1<<0); //baisse le drapeau dû à MR0
-  LPC_GPIO3->FIOPIN &=~ PWM_Servo;     //inverse l’état de P3.26
-  LPC_TIM1->TCR = 0 ;                     // Arret Timer 1 
+   if (LPC_TIM0->IR & (1 << 0)) // MR0 déclenché
+  {  
+   LPC_TIM0->IR |= (1 << 0);     // Effacer le drapeau MR0
+    LPC_GPIO3->FIOPIN |= PWM_Servo; // Broche à 1
+  }
+	if (LPC_TIM0->IR & (1 << 1))  // MR1 déclenché
+  {
+	LPC_TIM0->IR |= (1 << 1);     // Effacer le drapeau MR1
+    LPC_GPIO3->FIOPIN &= ~PWM_Servo; // Broche à 0
+  }
 }
 
-void initTimer0 (int prescaler, int match) 
+//////////Fonction Timers /////////////////////////////////////////////////////
+void initTimer0 (int match) 
 {
-  LPC_TIM0->PR = prescaler;                // Prescaler PR
-  LPC_TIM0->MR0 = match;                   // valeur de MR
-  LPC_TIM0->MCR = LPC_TIM0->MCR | (3<<0); // RAZ du compteur + interruption
-  LPC_TIM0->TCR = 1 ;                     // Lancement Timer
+  //Configuration du TIMER0
+  LPC_TIM0->PR   = 2499;                	// Prescaler PR pour interruption tout les 20 ms
+  LPC_TIM0->MR0  = 199 - match;                   // valeur de MR pour interruption tout les 20 ms
+  LPC_TIM0->MR1  = match;                   // valeur de MR
+  LPC_TIM0->MCR |= (3<<0); 					// RAZ du compteur + interruption pour MR0
+  LPC_TIM0->MCR |= (1<<3); 					// RAZ du compteur + interruption pour MR1
+  LPC_TIM0->TCR  = 1 ;                     // Lancement Timer
+  
+  //Configuration Interuption sur TIMER0
   NVIC_SetPriority(TIMER0_IRQn,0);        // TIMER0 (IRQ1) : interruption de priorité 0
   NVIC_EnableIRQ(TIMER0_IRQn);            // active les interruptions TIMER0
-}
-void initTimer1 (int prescaler, int match) 
-{
-  LPC_TIM1->PR = prescaler;                // Prescaler PR
-  LPC_TIM1->MR0 = match;                   // valeur de MR
-  LPC_TIM1->MCR = LPC_TIM1->MCR | (3<<0); // RAZ du compteur + interruption
-  LPC_TIM1->TCR = 1 ;                     // Lancement Timer
-  NVIC_SetPriority(TIMER1_IRQn,1);        // TIMER0 (IRQ1) : interruption de priorité 0
-  NVIC_EnableIRQ(TIMER1_IRQn);            // active les interruptions TIMER0
 }
 
 
@@ -225,20 +223,6 @@ void Reculer(char vitesse)
     LPC_GPIO0-> FIOPIN |= EN_A | EN_B;		// EN_A & EN_B à 1
     LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
 }
-
-//void Freiner() 
-//{
-//    LPC_GPIO0-> FIOPIN |= IN_B;					// IN_B à 1 P0.17
-//		LPC_GPIO0-> FIOPIN &=~ IN_A; 				// IN_A à 0 P0.16
-//    LPC_GPIO0-> FIOPIN |= EN_A | EN_B;		// EN_A & EN_B à 1
-//    LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
-//}
-
-void DelayMs(uint32_t ms) {
-		uint32_t i ;
-    for(i = 0; i < ms * 20000; i++) __NOP();
-}
-
 
 
 void UART_Callback(uint32_t event)
@@ -333,7 +317,7 @@ void moteur(void const *argument)
 				switch (Z)
 				{
 				case(1):
-						Avancer(100);
+						Avancer(90);
 						break;
 				case(0):
 				{
@@ -374,24 +358,26 @@ void moteur(void const *argument)
 
 void cervo(void const *argument)
 {
-		
+		char match,match_avant;
 
 				
 				while (1)
 				{
 					
 
-					if (X>160)		
-							initTimer1 (999	, 29 ) ;	
+					if (X > 160 )	
+						 LPC_TIM0->MR1  = 11 ;                   // valeur de MR              
 					
 					else if (X<90)	
-							initTimer1 (999	, 40 ) ;
+						 LPC_TIM0->MR1  = 16 ;                   // valeur de MR
 					
 					else 
-							initTimer1 (999	, 34 ) ;
-
-
-					
+						 LPC_TIM0->MR1  = 14 ;                   // valeur de MR
+							
+//					if(match!=match_avant)
+//					//RAZ
+//					
+//					LPC_TIM1->MR0 = 14 ;
     		}
 
 }
