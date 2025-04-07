@@ -12,6 +12,9 @@
 #include "RTE_Components.h" 
 #include "cmsis_os.h"// Component selection           
 #include "RFID_tache.h" 
+#include "Driver_CAN.h"                 // ::CMSIS Driver:CAN
+#include "CAN_LPC17xx.h"
+
 static uint16_t   background_color = GLCD_COLOR_RED;
 
 osThreadId ID_TacheRFID ;
@@ -25,7 +28,19 @@ osMailQId ID_BAL;
 osMailQDef(NomBAL,1,MaStructure); 
 
  
- 
+extern ARM_DRIVER_CAN Driver_CAN1;
+
+Driver_CAN1.Initialize(NULL,NULL);
+Driver_CAN1.PowerControl(ARM_POWER_FULL);
+Driver_CAN1.SetMode(ARM_CAN_MODE_INITIALIZATION);
+Driver_CAN1.SetBitrate(ARM_CAN_BITRATE_NOMINAL,
+125000,
+ARM_CAN_BIT_PROP_SEG(5U) | 
+ARM_CAN_BIT_PHASE_SEG1(1U) | 
+ARM_CAN_BIT_PHASE_SEG2(1U) | 
+ARM_CAN_BIT_SJW(1U)
+
+);
 
 
 
