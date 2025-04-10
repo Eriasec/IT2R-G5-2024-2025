@@ -1,7 +1,7 @@
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h
-.\objects\stm32f4xx_hal_dma.o: C:\Users\TEMP.GEII2.017\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\STM32F407VGTx\stm32f4xx_hal_conf.h
-.\objects\stm32f4xx_hal_dma.o: C:\Users\TEMP.GEII2.017\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
+.\objects\stm32f4xx_hal_dma.o: U:\PROJET_IT2R\GPS\GPS\RTE\Device\STM32F407VGTx\stm32f4xx_hal_conf.h
+.\objects\stm32f4xx_hal_dma.o: U:\PROJET_IT2R\GPS\GPS\RTE\RTE_Components.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
@@ -21,6 +21,7 @@
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_dma.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_dma_ex.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_cortex.h
+.\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_can.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ex.h
 .\objects\stm32f4xx_hal_dma.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.14.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ramfunc.h

@@ -95,7 +95,7 @@ void InitCan2(void) {     // Initialisation CAN2 pour transmettre les données ex
 void GPS_CAN_Thread(void const *arg) {   // Tâche reception UART du GPS - Transmission CAN vers LCD
     char* debut_trame;
     int champs_valides;
-    uint8_t data_buf[8];
+    uint8_t data_buf[9];
     ARM_CAN_MSG_INFO tx_msg_info;
 
     tx_msg_info.id  = ARM_CAN_STANDARD_ID(GPS_CAN_ID);
@@ -115,13 +115,15 @@ void GPS_CAN_Thread(void const *arg) {   // Tâche reception UART du GPS - Transm
                     
                     sprintf(debugBuf, "%.4f", latitude);  //Lon=%.4f\r\n
                     
-                    while (Driver_USART2.GetStatus().tx_busy);
-                    Driver_USART2.Send(debugBuf, strlen(debugBuf));
+                    
 
-                    //memcpy(&data_buf[0], &latitude, 4);
+                    memcpy(&data_buf[0], &latitude, sizeof latitude);
                     //memcpy(&data_buf[4], &longitude, 4);
+                  while (Driver_USART2.GetStatus().tx_busy);
+                    Driver_USART2.Send(data_buf, 4);
                   
-                    Driver_CAN2.MessageSend(2, &tx_msg_info, debugBuf, 4); // On met debugBuf pour tester directement avec la latitude
+                   // Driver_CAN2.MessageSend(2, &tx_msg_info, data_buf, 4); // On met debugBuf pour tester directement avec la latitude
+                     Driver_CAN2.MessageSend(2, &tx_msg_info, (const uint8_t *)&latitude, 4);
                 } else {
                     sprintf(debugBuf, "Trame invalide\r\n");
                     while (Driver_USART2.GetStatus().tx_busy);

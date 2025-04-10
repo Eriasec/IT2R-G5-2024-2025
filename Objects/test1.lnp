@@ -1,5 +1,6 @@
 --cpu Cortex-M4.fp
 ".\objects\main.o"
+".\objects\basecan.o"
 ".\objects\buttons_f4discovery.o"
 ".\objects\led_f4discovery.o"
 "C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\LIB\ARM\RTX_CM4.lib"
@@ -7,6 +8,7 @@
 ".\objects\can_stm32f4xx.o"
 ".\objects\usart_stm32f4xx.o"
 ".\objects\stm32f4xx_hal.o"
+".\objects\stm32f4xx_hal_can.o"
 ".\objects\stm32f4xx_hal_cortex.o"
 ".\objects\stm32f4xx_hal_dma.o"
 ".\objects\stm32f4xx_hal_dma_ex.o"
