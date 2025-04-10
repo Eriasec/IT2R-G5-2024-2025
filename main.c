@@ -19,6 +19,8 @@
 #define LIDAR_REQUEST_FORCE_SCAN		0x21
 #define LIDAR_REQUEST_GET_INFO			0x50
 
+#define N_OCTETS										1800
+
 extern GLCD_FONT GLCD_Font_16x24;
 
 // __________ Prototypes Fonctions UART __________ 
@@ -43,12 +45,12 @@ void callbackUSART(uint32_t event);
 
 osThreadId ID_ThreadLidarUART;
 osThreadId ID_ThreadLidarTraitement;
-//osThreadId ID_ThreadGPS;
+osThreadId ID_ThreadGPS;
 
 // __________ Variables globales __________ \\
 
 typedef struct {
-	uint8_t reception[1800];
+	uint8_t reception[N_OCTETS];
 } maStructure;
 
 // __________ OS MailBox __________ \\
@@ -85,7 +87,7 @@ void threadLidarUART(void const * argument) {
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
 				LIDAR_Scan();
-				Driver_USART1.Receive(t_ptr->reception, 1800);
+				Driver_USART1.Receive(t_ptr->reception, N_OCTETS);
 				osSignalWait(0x01, osWaitForever);
 				LIDAR_Stop();
 				osMailPut(ID_BAL, t_ptr);
@@ -108,18 +110,18 @@ void threadLidarTraitement(void const * agument) {
 		evt = osMailGet(ID_BAL,osWaitForever);
 		if(evt.status == osEventMail) {
 			r_ptr = evt.value.p;
-			for(i=0; i<1800; i+=5) {
+			for(i=0; i<N_OCTETS; i+=5) {
 				angle = 		(r_ptr->reception[i+1] 				) >> 1;		// _____ Octets 0 a  6 de l'angle _____
 				angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
 				angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
+				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);						// On efface
+				GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
+				
 				if(r_ptr->reception[i] == 0x3E) {
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
 					distanceVeritable = (distance >> 2);					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
 					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
-					
-					GLCD_SetForegroundColor(GLCD_COLOR_WHITE);						// On efface
-					GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
 					
 					ang = ((float) angleVeritable)*3.1415/180.0;
 					x[angleVeritable] = (cos(ang) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
@@ -145,14 +147,18 @@ void threadLidarTraitement(void const * agument) {
 
 
 
-//void threadGPS(void const * argument) {
-//	
-//}
+void threadGPS(void const * argument) {
+	osDelay(osWaitForever);
+//	while(1) {
+//		
+//	}
+}
 
 // __________ OS Thread Def __________ \\
 
 osThreadDef(threadLidarUART, osPriorityAboveNormal, 1, 0);		
-osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);			
+osThreadDef(threadLidarTraitement, osPriorityNormal, 1, 0);	
+osThreadDef(threadGPS, osPriorityNormal, 1, 0);
 
 
 
@@ -185,6 +191,7 @@ int main(void) {
 	osKernelInitialize();
 	ID_ThreadLidarUART = osThreadCreate(osThread(threadLidarUART), NULL);
 	ID_ThreadLidarTraitement = osThreadCreate(osThread(threadLidarTraitement), NULL);
+	ID_ThreadGPS = osThreadCreate(osThread(threadGPS), NULL);
 	
 	if(ID_ThreadLidarTraitement == NULL) {
 		sprintf(tab, "ERREUR TRAITEMENT");
