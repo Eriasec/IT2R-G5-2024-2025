@@ -43,8 +43,9 @@ void callbackUSART(uint32_t event);
 
 osThreadId ID_ThreadLidarUART;
 osThreadId ID_ThreadLidarTraitement;
+osThreadId ID_ThreadGPS;
 
-// __________ Variables globales __________ \\
+// __________ Déclaration de type __________ \\
 
 typedef struct {
 	uint8_t reception[200];
@@ -62,7 +63,7 @@ osMailQDef(BAL_Reception, 3, maStructure);
 void threadLidarUART(void const * argument) {
 	maStructure *t_ptr;
 	
-	uint8_t reception[200] = {0};
+	uint8_t reception[7] = {0};
 	char state = 0;
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
@@ -83,9 +84,14 @@ void threadLidarUART(void const * argument) {
 				
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
+				LIDAR_Scan();
+//				osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 				Driver_USART1.Receive(t_ptr->reception, 200);
 				osSignalWait(0x01, osWaitForever);
+				LIDAR_Stop();
+//				osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 				osMailPut(ID_BAL, t_ptr);
+//				state = 0;
 				break;
 		}
 	}
@@ -97,7 +103,8 @@ void threadLidarTraitement(void const * agument) {
 	osEvent evt;							// Event
 	
 	int i;
-	uint16_t angle, distance, angleVeritable, distanceVeritable, x=0, y=0;
+	uint16_t angle, distance, angleVeritable, distanceVeritable, x[360], y[360];
+	float ang;
 //	char tab[10];
 	
 	while(1) {
@@ -105,25 +112,32 @@ void threadLidarTraitement(void const * agument) {
 		if(evt.status == osEventMail) {
 			r_ptr = evt.value.p;
 			for(i=0; i<200; i+=5) {
+				
 				if(r_ptr->reception[i] == 0x3E) {
-					angle = 		(r_ptr->reception[i+1] & 0xFE	) >> 1;		// _____ Octets 0 a  6 de l'angle _____
+					angle = 		(r_ptr->reception[i+1] 				) >> 1;		// _____ Octets 0 a  6 de l'angle _____
 					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
+					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
-					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
-					distanceVeritable = (distance >> 2) - 100;					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
+					distanceVeritable = (distance >> 2);					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
 					distanceVeritable = distanceVeritable >> 2;					// Mise a l'echelle
-					x = (cos(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
-					y = (sin(((double) angleVeritable)*3.1415/180) * distanceVeritable) + 120;				// calcul de la composante en y (+120 pour afficher au milieu)
-					if(y > 240) {
-						y = 240;
+					
+					ang = ((float) angleVeritable)*3.1415/180.0;
+					x[angleVeritable] = (cos(ang) * distanceVeritable) + 160;				// calcul de la composante en x (+160 pour afficher au milieu)
+					y[angleVeritable] = (sin(ang) * distanceVeritable) + 120;				// calcul de la composante en y (+120 pour afficher au milieu)
+					if(y[angleVeritable] > 240) {
+						y[angleVeritable] = 240;
 					}
-					if(x > 320) {
-						x = 320;
+					if(x[angleVeritable] > 320) {
+						x[angleVeritable] = 320;
 					}
 					
-					GLCD_DrawPixel(x,y);
+					GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
+					GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
 				}
+				
+//				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);						// On efface
+//				GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
 			}
 			osMailFree(ID_BAL, r_ptr);
 		}
@@ -132,6 +146,10 @@ void threadLidarTraitement(void const * agument) {
 
 
 
+
+void threadGPS(void const * argument) {
+	
+}
 
 // __________ OS Thread Def __________ \\
 
