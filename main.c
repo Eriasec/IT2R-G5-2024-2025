@@ -54,6 +54,7 @@ void InitGPIO(void);
 void InitPWM(int);
 void Avancer(char vitesse);
 void Reculer(char vitesse);
+void Arret(void);
 void DelayMs(unsigned int ms);
 void initTimer0 ( int match );
 
@@ -84,15 +85,20 @@ int main(void)
 	
 	Init_UART();
 	InitGPIO();
-  InitPWM(70);
+	InitPWM(70);
 	LPC_GPIO3->FIODIR |=  PWM_Servo;       //P3.26 configuré en sortie
 	
-  initTimer0( 14 ) ;       // PR et MR pour interuption tout les 20 ms
-  
+	initTimer0( 14 ) ;      							 // PR et MR pour interuption tout les 20 ms
+	////Configuration interuption sur EINT1 (P2.11) sur detection panneau stop
+	LPC_PINCON->PINSEL4 = LPC_PINCON->PINSEL4 | (1<<22); 	//mode EINT1 pour P2.11
+	LPC_SC->EXTMODE |= (1<<1); 														//déclenche sur front pour EINT1
+	LPC_SC->EXTPOLAR = LPC_SC->EXTPOLAR | (1<<1); 				//choix front montant
+	NVIC_SetPriority(EINT1_IRQn,3); 											//EINT1 en interruption de priorité 3
+	NVIC_EnableIRQ(EINT1_IRQn); 													//active les interruptions EINT1
 	
-
 	
 	
+	///Creation des taches et attribution des ID
 	ID_Receive = osThreadCreate(osThread(Receive_UART), NULL);
 	ID_cervo = osThreadCreate(osThread(cervo), NULL);
 	ID_Afficher_nunchuk = osThreadCreate(osThread(Afficher_nunchuk), NULL);
@@ -122,6 +128,7 @@ void Init_UART(void){
 	Driver_USART1.Control(ARM_USART_CONTROL_RX,1);
 }
 
+
 //////////Fonction d'interruption /////////////////////////////////////////////////////
 void TIMER0_IRQHandler(void) 			// Fonction d'interruption sur TIMER0
 {
@@ -137,6 +144,11 @@ void TIMER0_IRQHandler(void) 			// Fonction d'interruption sur TIMER0
   }
 }
 
+void EINT1_IRQHandler(void) ///Interruption sur front montant au pin P2.11 activé lorsque IO13 de Maixpee à 1 dès que panneau stop detecté
+{
+	LPC_SC->EXTINT = (1<<0); 	//acquittement
+	Arret();
+}
 //////////Fonction Timers /////////////////////////////////////////////////////
 void initTimer0 (int match) 
 {
@@ -153,11 +165,6 @@ void initTimer0 (int match)
   NVIC_EnableIRQ(TIMER0_IRQn);            // active les interruptions TIMER0
 }
 
-
-
-
-
-
 // Initialisation des GPIO
 void InitGPIO(void) 
 {
@@ -166,13 +173,6 @@ void InitGPIO(void)
 //		LPC_GPIO0->FIODIR &=~ ( 1 << 5 );
 //    LPC_GPIO3->FIODIR |= SERVO_PIN; // Configurer P3.26 comme sortie
 }
-
-
-
-
-
-
-
 
 // Initialisation du PWM -- Moteur
 void InitPWM(int alpha)
@@ -208,9 +208,6 @@ void InitPWM(int alpha)
 }
 
 
-
-
-
 // Avancer avec une vitesse donnée
 void Avancer(char vitesse) 
 {
@@ -228,7 +225,16 @@ void Reculer(char vitesse)
     LPC_GPIO0-> FIOPIN |= EN_A | EN_B;		// EN_A & EN_B à 1
     LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
 }
-
+// Arret / Stop
+void Arret(void) 
+{
+		char vitesse = 0;
+    LPC_GPIO0-> FIOPIN &=~ IN_B;				// IN_B à 0 P0.17
+		LPC_GPIO0-> FIOPIN &=~ IN_A; 				// IN_A à 0 P0.16
+		
+    LPC_GPIO0-> FIOPIN |= EN_A | EN_B;	// EN_A & EN_B à 1
+    LPC_PWM1->MR2 = vitesse;						// Rapport cyclique alpha OU vitesse
+}
 
 void UART_Callback(uint32_t event)
 {		
@@ -241,8 +247,6 @@ void UART_Callback(uint32_t event)
     	
 
 }
-
-
 
 
 void Receive_UART(void const *argument){
@@ -361,6 +365,7 @@ void moteur(void const *argument)
 				}
 }
 
+
 void cervo(void const *argument)
 {
 		char match,match_avant;
@@ -393,7 +398,3 @@ void cervo(void const *argument)
 				
 				
 }
-
-
-
-
