@@ -45,7 +45,7 @@ osThreadId ID_ThreadLidarUART;
 osThreadId ID_ThreadLidarTraitement;
 osThreadId ID_ThreadGPS;
 
-// __________ Déclaration de type __________ \\
+// __________ Variables globales __________ \\
 
 typedef struct {
 	uint8_t reception[200];
@@ -63,7 +63,7 @@ osMailQDef(BAL_Reception, 3, maStructure);
 void threadLidarUART(void const * argument) {
 	maStructure *t_ptr;
 	
-	uint8_t reception[7] = {0};
+	uint8_t reception[200] = {0};
 	char state = 0;
 	
 	ID_BAL = osMailCreate(osMailQ(BAL_Reception),NULL);
@@ -85,13 +85,10 @@ void threadLidarUART(void const * argument) {
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
 				LIDAR_Scan();
-//				osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 				Driver_USART1.Receive(t_ptr->reception, 200);
 				osSignalWait(0x01, osWaitForever);
 				LIDAR_Stop();
-//				osSignalWait(0x02, osWaitForever); // _____ Attente de la fin du send _____
 				osMailPut(ID_BAL, t_ptr);
-//				state = 0;
 				break;
 		}
 	}
@@ -112,11 +109,10 @@ void threadLidarTraitement(void const * agument) {
 		if(evt.status == osEventMail) {
 			r_ptr = evt.value.p;
 			for(i=0; i<200; i+=5) {
-				
+				angle = 		(r_ptr->reception[i+1] 				) >> 1;		// _____ Octets 0 a  6 de l'angle _____
+				angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
+				angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
 				if(r_ptr->reception[i] == 0x3E) {
-					angle = 		(r_ptr->reception[i+1] 				) >> 1;		// _____ Octets 0 a  6 de l'angle _____
-					angle |= 		(r_ptr->reception[i+2]				) << 7;		// _____ Octets 7 a 14 de l'angle _____
-					angleVeritable = angle >> 6;												// Division par 64 pour obtenir le vrai angle
 					distance = 	(r_ptr->reception[i+3]				) << 0;		// _____ Octets 0 a  7 de l'angle _____
 					distance |= (r_ptr->reception[i+4]				) << 8;		// _____ Octets 8 a 15 de l'angle _____
 					distanceVeritable = (distance >> 2);					// Division par 4 pour obtenir la vraie distance et - 100 car a moins de 10cm la qualite est trop basse
@@ -136,8 +132,8 @@ void threadLidarTraitement(void const * agument) {
 					GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
 				}
 				
-//				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);						// On efface
-//				GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
+				GLCD_SetForegroundColor(GLCD_COLOR_WHITE);						// On efface
+				GLCD_DrawPixel(x[angleVeritable], y[angleVeritable]);
 			}
 			osMailFree(ID_BAL, r_ptr);
 		}

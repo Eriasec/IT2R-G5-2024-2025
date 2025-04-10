@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\lidar.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\lidar.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu Apr 10 18:21:21 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu Apr 10 16:45:40 2025
 <BR><P>
 <H3>Maximum Stack Usage =       1688 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -516,6 +516,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SSPx_PowerControl
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SSPx_Initialize
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SSPx_Control
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;threadLidarUART
 </UL>
 
 <P><STRONG><a name="[16b]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 4 bytes, rt_memclr_w.o(.text), UNUSED)
@@ -1746,7 +1747,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rt_systick
 </UL>
 
-<P><STRONG><a name="[49]"></a>threadLidarTraitement</STRONG> (Thumb, 338 bytes, Stack size 1496 bytes, main.o(i.threadLidarTraitement))
+<P><STRONG><a name="[49]"></a>threadLidarTraitement</STRONG> (Thumb, 358 bytes, Stack size 1496 bytes, main.o(i.threadLidarTraitement))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1688<LI>Call Chain = threadLidarTraitement &rArr; sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMailGet
@@ -1766,8 +1767,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
-<P><STRONG><a name="[48]"></a>threadLidarUART</STRONG> (Thumb, 164 bytes, Stack size 24 bytes, main.o(i.threadLidarUART))
-<BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = threadLidarUART &rArr; GLCD_DrawChar &rArr; GLCD_SetWindow &rArr; wr_reg
+<P><STRONG><a name="[48]"></a>threadLidarUART</STRONG> (Thumb, 166 bytes, Stack size 216 bytes, main.o(i.threadLidarUART))
+<BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = threadLidarUART &rArr; GLCD_DrawChar &rArr; GLCD_SetWindow &rArr; wr_reg
 </UL>
 <BR>[Calls]<UL><LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSignalWait
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMailPut
@@ -1776,6 +1777,7 @@ Global Symbols
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GLCD_DrawChar
 <LI><a href="#[12e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LIDAR_Stop
 <LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LIDAR_Scan
+<LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
