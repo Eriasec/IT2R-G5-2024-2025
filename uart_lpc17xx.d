@@ -14,5 +14,5 @@
 .\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Device\Include\system_LPC17xx.h
 .\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\PIN_LPC17xx.h
 .\uart_lpc17xx.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\RTE_Driver\GPDMA_LPC17xx.h
-.\uart_lpc17xx.o: C:\Users\TEMP.GEII2.025\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
-.\uart_lpc17xx.o: C:\Users\TEMP.GEII2.025\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h
+.\uart_lpc17xx.o: C:\Users\TEMP.GEII2.019\Documents\GitHub\IT2R-G5-2024-2025\RTE\Device\LPC1768\RTE_Device.h
+.\uart_lpc17xx.o: C:\Users\TEMP.GEII2.019\Documents\GitHub\IT2R-G5-2024-2025\RTE\RTE_Components.h

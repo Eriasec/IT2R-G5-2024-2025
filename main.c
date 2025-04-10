@@ -15,7 +15,6 @@
 #include "Driver_CAN.h"                 // ::CMSIS Driver:CAN
 #include "CAN_LPC17xx.h"
 
-static uint16_t   background_color = GLCD_COLOR_RED;
 
 osThreadId ID_TacheRFID ;
 osThreadId ID_TacheJouerSon ;
@@ -28,19 +27,19 @@ osMailQId ID_BAL;
 osMailQDef(NomBAL,1,MaStructure); 
 
  
-extern ARM_DRIVER_CAN Driver_CAN1;
+//extern ARM_DRIVER_CAN Driver_CAN1;
 
-Driver_CAN1.Initialize(NULL,NULL);
-Driver_CAN1.PowerControl(ARM_POWER_FULL);
-Driver_CAN1.SetMode(ARM_CAN_MODE_INITIALIZATION);
-Driver_CAN1.SetBitrate(ARM_CAN_BITRATE_NOMINAL,
-125000,
-ARM_CAN_BIT_PROP_SEG(5U) | 
-ARM_CAN_BIT_PHASE_SEG1(1U) | 
-ARM_CAN_BIT_PHASE_SEG2(1U) | 
-ARM_CAN_BIT_SJW(1U)
+//Driver_CAN1.Initialize(NULL,NULL);
+//Driver_CAN1.PowerControl(ARM_POWER_FULL);
+//Driver_CAN1.SetMode(ARM_CAN_MODE_INITIALIZATION);
+//Driver_CAN1.SetBitrate(ARM_CAN_BITRATE_NOMINAL,
+//125000,
+//ARM_CAN_BIT_PROP_SEG(5U) | 
+//ARM_CAN_BIT_PHASE_SEG1(1U) | 
+//ARM_CAN_BIT_PHASE_SEG2(1U) | 
+//ARM_CAN_BIT_SJW(1U)
 
-);
+//);
 
 
 
@@ -73,27 +72,18 @@ void JouerSon(const void *argument){
 			recep=EVretour.value.p;
 			valeur_recue= recep->choixson ;
 			
-		
-			
 		next1[6]=valeur_recue ;
-			
-			
-			
-			
 		
 		checksum =  ~(next1[1] + next1[2] + next1[3] + next1[4] + next1[5] + next1[6]) + 1;
-		
 		
 		next1[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
     next1[8] = checksum & 0xFF;         // Checksum Poid faible
 		
-		
-	
-    
     // Envoi de la trame via UART
 		
-    while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
-    Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
+		osSignalWait(0x02,osWaitForever);
+    Driver_USART1.Send(next1, 10);  // Envoi des 10 octets
+		
 		
 		delay_ms(2000) ;
 		pause();
@@ -104,7 +94,7 @@ void JouerSon(const void *argument){
 void RFID(const void *argument) {
 	int i ;
   int j ;
-  uint8_t trame[50];
+  uint8_t trame[15];
   uint8_t uid[4];
   uint8_t UID_cible[4] = {0x30, 0x34, 0x31, 0x42};
   char hexStr[2];
@@ -115,15 +105,17 @@ void RFID(const void *argument) {
 	while(1) {
 	  
 		GLCD_SetBackgroundColor(GLCD_COLOR_WHITE) ;
-		GLCD_ClearScreen();
+		//GLCD_ClearScreen();
 	
 		GLCD_SetFont(&GLCD_Font_6x8);  // & signifie "adresse de la variable"
 		GLCD_DrawString(10, 100, "trame: ");
     GLCD_DrawString(10, 150, "UID: ");
     
-    Driver_USART1.Receive(trame,20);
-		while(Driver_USART1.GetRxCount()<20);
-    for (i = 0; i < 20; i++) {
+    Driver_USART0.Receive(trame,15);
+		osSignalWait(0x01,osWaitForever);
+	
+		
+    for (i = 0; i < 15; i++) {
 						sprintf(hexStr, "%02X", trame[i]); // Conversion en hex
             GLCD_DrawString(50 + (i * 18), 100, hexStr); // Affichage des octets en hex
     }
@@ -153,19 +145,23 @@ void RFID(const void *argument) {
      
 		
     }
+			
     //allumage d'une led si UID trouvé : 
   if (memcmp(uid, UID_cible, 4) == 0) {
+		LED_On(5);		
 		ptr=osMailAlloc(ID_BAL,osWaitForever);
 		ptr-> choixson =0x02;
 		osMailPut(ID_BAL,ptr);
-		LED_On(5);
-		osSignalSet(ID_TacheJouerSon,0x01); 
+	
+		osSignalSet(ID_TacheJouerSon,0x01);
+		
 		osDelay(2000);
     
 		
     
   }
 	else {
+			LED_On(4);
 			ptr=osMailAlloc(ID_BAL,osWaitForever);
 			ptr-> choixson =0x03;
 			osMailPut(ID_BAL,ptr);
@@ -198,6 +194,8 @@ osThreadDef (JouerSon, osPriorityNormal, 1, 0); // 1 instance, taille pile par d
 
 
 
+
+
 	
 
 int main (void){
@@ -205,20 +203,23 @@ int main (void){
 	
   Init_UART1();
 	Init_UART0();
-	LED_Initialize() ;
+	
+	LED_Initialize();
+	
 	GLCD_Initialize();
 	GLCD_ClearScreen();
 	GLCD_SetFont(&GLCD_Font_6x8);
-	initialise_player();
-	ID_BAL= osMailCreate(osMailQ(NomBAL),NULL); 
 	
+	initialise_player();
+	
+	ID_BAL = osMailCreate(osMailQ(NomBAL),NULL); 
 	
 	ID_TacheRFID = osThreadCreate ( osThread ( RFID ), NULL ) ;
 	ID_TacheJouerSon = osThreadCreate ( osThread ( JouerSon ), NULL ) ;
 	
 	osKernelStart() ;
 	
-	osDelay(osWaitForever) ;
+	osDelay(osWaitForever);
 
 	while (1){
 		osDelay(osWaitForever);

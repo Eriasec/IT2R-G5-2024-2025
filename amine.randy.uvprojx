@@ -422,11 +422,6 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>RFID_tache.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\RFID_tache.h</FilePath>
-            </File>
-            <File>
               <FileName>RFID_tache.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\RFID_tache.c</FilePath>

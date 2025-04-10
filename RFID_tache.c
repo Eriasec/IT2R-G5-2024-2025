@@ -13,6 +13,10 @@
 #include "cmsis_os.h"// Component selection
 #include "RFID_tache.h"   
  
+extern osThreadId ID_TacheRFID ;
+extern osThreadId  ID_TacheJouerSon ;
+
+
 void volume_choix(uint8_t choix){
 	
 		uint16_t checksum=0 ;
@@ -45,36 +49,6 @@ void volume_choix(uint8_t choix){
  
  
  
- 
- 
- 
- void next1(void){
-	
-		uint16_t checksum=0 ;
-    // Trame complète pour jouer le fichier 1 
-    uint8_t next1[10] = {
-        0x7E,  // Start
-        0xFF,  // Version
-        0x06,  // Longueur des données (6 octets)
-        0x01,  // choisir un dossier
-        0x00,  // Pas de réponse nécessaire
-        0x00,  // dossier 1
-        0x00,  // fichier 1
-        0x00,  // Checksum à calculé
-				0x00,
-        0xEF   // End
-    };
-		checksum =  ~(next1[1] + next1[2] + next1[3] + next1[4] + next1[5] + next1[6]) + 1;
-		
-		
-		next1[7] = (checksum >> 8) & 0xFF;  // Checksum Poid fort
-    next1[8] = checksum & 0xFF;         // Checksum Poid faible
-    
-    // Envoi de la trame via UART
-    while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
-    Driver_USART0.Send(next1, 10);  // Envoi des 10 octets
-	
-	}
 
 void pause(void){
 	
@@ -169,9 +143,32 @@ void envoison(uint8_t numFichier){
     while (Driver_USART0.GetStatus().tx_busy == 1);  // Attente que la transmission soit libre
     Driver_USART0.Send(datadfplayer, 10);  // Envoi des 10 octets
 }
+void Tx_hautparleur_cb( uint32_t ev){
+	
+	if((ev & ARM_USART_EVENT_TX_COMPLETE )==ARM_USART_EVENT_TX_COMPLETE)
+	{
+		osSignalSet(ID_TacheJouerSon,0x02);
+	}
+	
+	
+	
+	
+}
 
+
+
+
+void Rx_RFID_cb(uint32_t ev)
+{
+	if((ev & ARM_USART_EVENT_RECEIVE_COMPLETE )==ARM_USART_EVENT_RECEIVE_COMPLETE)
+	{
+		osSignalSet(ID_TacheRFID,0x01);
+	}
+
+}
+	
 void Init_UART0(void){
-	Driver_USART0.Initialize(NULL);
+	Driver_USART0.Initialize(Rx_RFID_cb);
 	Driver_USART0.PowerControl(ARM_POWER_FULL);
 	Driver_USART0.Control(	ARM_USART_MODE_ASYNCHRONOUS |
 							ARM_USART_DATA_BITS_8		|

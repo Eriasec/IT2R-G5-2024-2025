@@ -37,4 +37,5 @@ void choixPiste(void);
 void next1(void);
 void pause(void);
 void volume_choix(uint8_t choix);
-	
+void Rx_RFID_cb( uint32_t ev);
+void Tx_hautparleur_cb( uint32_t ev);
