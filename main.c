@@ -242,7 +242,7 @@ void InitPWM(int alpha) {
 		LPC_PWM1->PR = 0;  // prescaler
 		LPC_PWM1->MR0 = 999;    // MR0+1=100   la période de la PWM vaut 100µs
 
-		LPC_PINCON->PINSEL7 = LPC_PINCON->PINSEL7| (3 << 18); // P3.25 est la sortie 1 PWM1   bit19 & bit18 
+		LPC_PINCON->PINSEL4 |= (1 << 4); // P2.2 est la sortie 1 PWM1   bit4 
 
 																	
 		LPC_PWM1->MCR = LPC_PWM1->MCR | 0x00000002; // Compteur relancé quand MR0 repasse à 0
@@ -251,7 +251,7 @@ void InitPWM(int alpha) {
 		LPC_PWM1->PCR = LPC_PWM1->PCR | 0x00000e00;  // autorise les sortie PWM1/2/3 bits 9, 10, 11
 
 
-		LPC_PWM1->MR2 = alpha;							//Rapport cyclique alpha OU vitesse
+		LPC_PWM1->MR3 = alpha;							//Rapport cyclique alpha OU vitesse
 
 		LPC_PWM1->TCR = 1;  /*validation de timer  et reset counter */
 }
