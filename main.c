@@ -32,6 +32,7 @@ char a;
 char rx_buffer[20];
 unsigned char C=0,Z=0,X,Y=125;
 char C1,Z1,X1,Y1;
+char clignotant_droit,clignotant_gauche,clignotant_stop;
 unsigned char direction=29;
 unsigned char start;
 
@@ -76,8 +77,11 @@ int main(void)
 	GLCD_ClearScreen();
 	GLCD_SetFont(&GLCD_Font_16x24);
 	GLCD_SetBackgroundColor(GLCD_COLOR_WHITE);
-	GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
-
+	GLCD_SetForegroundColor(GLCD_COLOR_BLACK); 
+	
+	LPC_GPIO0 -> FIODIR |= ( 1 << 4 ) ;
+	LPC_GPIO0 -> FIODIR |= ( 1 << 5 ) ;
+	
 	Init_UART();
 	InitGPIO();
   InitPWM(70);
@@ -158,8 +162,9 @@ void initTimer0 (int match)
 void InitGPIO(void) 
 {
     LPC_GPIO0->FIODIR |= (IN_A | IN_B | EN_A | EN_B);  // Configurer comme sorties
-    
-		//LPC_GPIO3->FIODIR |= SERVO_PIN; // Configurer P3.26 comme sortie
+//    LPC_GPIO0->FIODIR &=~ ( 1 << 4 );
+//		LPC_GPIO0->FIODIR &=~ ( 1 << 5 );
+//    LPC_GPIO3->FIODIR |= SERVO_PIN; // Configurer P3.26 comme sortie
 }
 
 
@@ -361,26 +366,34 @@ void cervo(void const *argument)
 		char match,match_avant;
 
 				
+				
 				while (1)
 				{
 					
-
-					if (X > 160 )	
-						 LPC_TIM0->MR1  = 11 ;                   // valeur de MR              
-					
-					else if (X<90)	
-						 LPC_TIM0->MR1  = 16 ;                   // valeur de MR
-					
-					else 
-						 LPC_TIM0->MR1  = 14 ;                   // valeur de MR
-							
-//					if(match!=match_avant)
-//					//RAZ
-//					
-//					LPC_TIM1->MR0 = 14 ;
-    		}
-
+				
+							if (X > 160 )	
+							{
+								 LPC_TIM0->MR1  = 11 ;                   // valeur de MR    
+								 LPC_GPIO0-> FIOPIN |= ( 1 << 4 );					// P0.4 à 1, clignotant droit
+								 LPC_GPIO0-> FIOPIN &=~ ( 1 << 5 );					// P0.5 à 0								 
+							}
+							else if ( X < 90 )
+							{
+								 LPC_TIM0->MR1  = 16 ;                   // valeur de MR
+								 LPC_GPIO0-> FIOPIN |=  ( 1 << 5 );					//  P0.5 à 1, clignotant gauche
+								 LPC_GPIO0-> FIOPIN &=~ ( 1 << 4 );					// P0.4 à 0
+							}
+							else 
+							{
+								 LPC_TIM0->MR1  = 13 ;                   // valeur de MR
+								 LPC_GPIO0-> FIOPIN &=~ ( 1 << 4 );					// P0.4 à 0, aucun des 2
+								 LPC_GPIO0-> FIOPIN &=~ ( 1 << 5 );					// P0.5 à 0
+							}
+				}
+				
+				
 }
+
 
 
 

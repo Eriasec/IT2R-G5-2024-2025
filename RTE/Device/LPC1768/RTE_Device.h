@@ -665,7 +665,7 @@
 //   <h> Pin Configuration
 //     <o> CAN1_RD <0=>Not used <1=>P0_0 <2=>P0_21
 //     <i> CAN1 receiver input.
-#define   RTE_CAN1_RD_ID                1
+#define   RTE_CAN1_RD_ID                2
 #if      (RTE_CAN1_RD_ID == 0)
   #define RTE_CAN1_RD_PIN_EN            0
 #elif    (RTE_CAN1_RD_ID == 1)
@@ -684,7 +684,7 @@
 #endif
 //     <o> CAN1_TD <0=>Not used <1=>P0_1 <2=>P0_22
 //     <i> CAN1 transmitter output.
-#define   RTE_CAN1_TD_ID                1
+#define   RTE_CAN1_TD_ID                2
 #if      (RTE_CAN1_TD_ID == 0)
   #define RTE_CAN1_TD_PIN_EN            0
 #elif    (RTE_CAN1_TD_ID == 1)
