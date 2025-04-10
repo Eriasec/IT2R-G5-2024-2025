@@ -28,14 +28,20 @@ Project File Date:  04/07/2025
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling lcd.c...
+lcd.c(32): warning:  #177-D: variable "lat_minsec" was declared but never referenced
+    double lat_minsec = lat-(lat_deg*100);
+lcd.c(34): warning:  #177-D: variable "lon_minsec" was declared but never referenced
+    double lon_minsec = lon-(lon_deg*100);
 lcd.c(97): warning:  #167-D: argument of type "unsigned char *" is incompatible with parameter of type "const char *"
   		GLCD_DrawString(10,10,(unsigned char*)texte);
-lcd.c(79): warning:  #177-D: variable "flatitude" was declared but never referenced
+lcd.c(98): warning:  #167-D: argument of type "unsigned char *" is incompatible with parameter of type "const char *"
+      GLCD_DrawString(10,80,(unsigned char*)texte1);
+lcd.c(78): warning:  #177-D: variable "flatitude" was declared but never referenced
   	float flatitude;
-lcd.c: 2 warnings, 0 errors
+lcd.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=25272 RO-data=7124 RW-data=136 ZI-data=7776  
-".\Objects\lcd.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=25200 RO-data=7120 RW-data=152 ZI-data=7760  
+".\Objects\lcd.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -137,7 +143,7 @@ Package Vendor: Keil
    * Component: Keil::Device:PIN:1.0.0
       Include file:  RTE_Driver\PIN_LPC17xx.h
       Source file:   RTE_Driver\PIN_LPC17xx.c
-Build Time Elapsed:  00:00:12
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
