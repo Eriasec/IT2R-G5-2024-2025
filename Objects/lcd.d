@@ -14,5 +14,6 @@
 .\objects\lcd.o: C:\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.0.0\Board\Board_GLCD.h
 .\objects\lcd.o: C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\3.0.0\Boards\Keil\MCB1700\Common\GLCD_Config.h
 .\objects\lcd.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\lcd.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\lcd.o: C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\objects\lcd.o: osObjects.h

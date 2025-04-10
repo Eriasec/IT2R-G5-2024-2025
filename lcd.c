@@ -3,6 +3,7 @@
 #include "Board_GLCD.h"                 // ::Board Support:Graphic LCD
 #include "GLCD_Config.h"                // Keil.MCB1700::Board Support:Graphic LCD
 #include "stdio.h"
+#include "string.h"
 #include "cmsis_os.h"
 #define osObjectsPublic                     // define objects in main module
 #include "osObjects.h"                      // RTOS object definitions
@@ -10,25 +11,44 @@
 extern GLCD_FONT GLCD_Font_6x8;
 extern GLCD_FONT GLCD_Font_16x24;
 
-osThreadId id_CANthreadR;
+osThreadId id_CANthreadR;    //MUTEX
+osMutexId ID_mut_GLCD;
 
 extern   ARM_DRIVER_CAN         Driver_CAN1;
 
+ARM_CAN_MSG_INFO   rx_msg_info;
+uint8_t data_buf[8];
 
-// CAN1 utilis? pour r?ception
+//double lat_minsec;
+//double lon_minsec;
+
+//void afficher_carte(void){
+//  GLCD_DrawPixel(0,0);
+//}
+
+//void conversionDMS(float lat, float lon){
+//  int lat_deg = (int)(lat/100);
+//  double lat_minsec = lat-(lat_deg*100);
+//  int lon_deg = (int)(lon/100);
+//  double lon_minsec = lon-(lon_deg*100);
+//  
+//}
+
 void myCAN1_callback(uint32_t obj_idx, uint32_t event)
 {
-    switch (event)
+    if (event & ARM_CAN_EVENT_RECEIVE)
     {
-    case ARM_CAN_EVENT_RECEIVE:
         /*  Message was received successfully by the obj_idx object. */
-       osSignalSet(id_CANthreadR, 0x01);
-        break;
+      //osMutexWait(ID_mut_GLCD, osWaitForever);
+      //Driver_CAN1.MessageRead(0,&rx_msg_info,data_buf,4);
+      osSignalSet(id_CANthreadR,0x01);
+      //osMutexRelease(ID_mut_GLCD);
+
     }
 }
 
 
-// CAN1 utilis? pour r?ception
+
 void InitCan1 (void) {
 	Driver_CAN1.Initialize(NULL,myCAN1_callback);
 	Driver_CAN1.PowerControl(ARM_POWER_FULL);
@@ -49,66 +69,59 @@ void InitCan1 (void) {
 	Driver_CAN1.SetMode(ARM_CAN_MODE_NORMAL);					// fin init
 }
 
-// CAN2 utilis? pour ?mission
 
-
-
-// tache envoi toutes les secondes
-
-
-// tache reception
 void CANthreadR(void const *argument)
 {
-	ARM_CAN_MSG_INFO   rx_msg_info;
 	
-	uint8_t data_buf[8];
+	
 	char texte[40];
 	int identifiant;
-	char retour;
+	float flatitude;
+  float latitude;
+  int i =0;
 	
 	
 	while(1)
-	{		
-		
+	{	
     
-		// Code pour reception trame + affichage Id et Data sur LCD
-		Driver_CAN1.MessageRead(0,&rx_msg_info,data_buf,8);
-		retour=data_buf[0];
-		identifiant=rx_msg_info.id;
-		
-		sprintf(texte,"%03X,  %02X",identifiant,retour);
-		GLCD_DrawString(10,10,(unsigned char*)texte);		
 		osSignalWait(0x01, osWaitForever);		// sommeil en attente reception
+		// Code pour reception trame + affichage Id et Data sur LCD
+    Driver_CAN1.MessageRead(0,&rx_msg_info,data_buf,4);
+    //latitude = (int)data_buf[0]<<24 | (int)data_buf[1]<<16 | (int)data_buf[2]<<8 | (int)data_buf[0];
+		memcpy(&latitude, &data_buf[0],4);
+		identifiant=rx_msg_info.id;
+		i++;
+		sprintf(texte,"%03X,  %f", identifiant,latitude);
+    //osMutexWait(ID_mut_GLCD, osWaitForever);
 
-   
+		GLCD_DrawString(10,10,(unsigned char*)texte);
+    //osMutexRelease(ID_mut_GLCD);  
+        
 	}
+  
 }
 
 
 osThreadDef(CANthreadR,osPriorityNormal, 1,0);
+osMutexDef (mut_GLCD);
 
-/*
- * main: initialize and start the system
- */
+
 int main (void) {
   osKernelInitialize ();                    // initialize CMSIS-RTOS
 
-  // initialize peripherals here
+  
 	GLCD_Initialize();
 	GLCD_ClearScreen();
   GLCD_SetFont(&GLCD_Font_16x24);
-  
 	
 	
-	// Initialisation des 2 p?riph?riques CAN
+	
 	InitCan1();
-	
-
-  // create 'thread' functions that start executing,
-  // example: tid_name = osThreadCreate (osThread(name), NULL);
+	  
 	id_CANthreadR = osThreadCreate (osThread(CANthreadR), NULL);
+  ID_mut_GLCD = osMutexCreate(osMutex(mut_GLCD));
 
 
-  osKernelStart ();                         // start thread execution 
+  osKernelStart ();                         
 	osDelay(osWaitForever);
 }
