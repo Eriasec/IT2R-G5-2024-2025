@@ -87,6 +87,8 @@ void threadLidarUART(void const * argument) {
 			case 1:
 				t_ptr = osMailAlloc(ID_BAL,osWaitForever);
 				LIDAR_Scan();
+			Driver_USART1.Receive(reception, 7);		// _____ Reception du header _____
+				osSignalWait(0x01, osWaitForever);			// _____ Attente de la fin du receive _____
 				Driver_USART1.Receive(t_ptr->reception, N_OCTETS);
 				osSignalWait(0x01, osWaitForever);
 				LIDAR_Stop();
