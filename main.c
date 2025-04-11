@@ -34,7 +34,8 @@ char debugBuf[100];
 
 void GPS_UART_Callback(uint32_t event) {
     if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
-        gps_data_ready = 1;
+        
+        osSignalSet(id_GPS_CAN,0x01);
     }
 }
 
@@ -95,14 +96,15 @@ void InitCan2(void) {     // Initialisation CAN2 pour transmettre les données ex
 void GPS_CAN_Thread(void const *arg) {   // Tâche reception UART du GPS - Transmission CAN vers LCD
     char* debut_trame;
     int champs_valides;
-    uint8_t data_buf[9];
+    uint8_t data_buf[8];
     ARM_CAN_MSG_INFO tx_msg_info;
 
     tx_msg_info.id  = ARM_CAN_STANDARD_ID(GPS_CAN_ID);
     tx_msg_info.rtr = 0;
 
     while (1) {
-        if (gps_data_ready) {
+        
+            osSignalWait(0x01, osWaitForever);		// sommeil, en attente de reception
             debut_trame = strstr(gps_buffer, "$GPRMC"); // Recherche de la trame GPRMC dans le buffer, si on la trouve, on pointe à l'adresse de la case correspondante
 
             if (debut_trame != NULL) {
@@ -115,15 +117,14 @@ void GPS_CAN_Thread(void const *arg) {   // Tâche reception UART du GPS - Transm
                     
                     sprintf(debugBuf, "%.4f", latitude);  //Lon=%.4f\r\n
                     
-                    
 
                     memcpy(&data_buf[0], &latitude, sizeof latitude);
-                    //memcpy(&data_buf[4], &longitude, 4);
+                    memcpy(&data_buf[4], &longitude, sizeof longitude);
                   while (Driver_USART2.GetStatus().tx_busy);
-                    Driver_USART2.Send(data_buf, 4);
+                    Driver_USART2.Send(data_buf, 8);
                   
-                   // Driver_CAN2.MessageSend(2, &tx_msg_info, data_buf, 4); // On met debugBuf pour tester directement avec la latitude
-                     Driver_CAN2.MessageSend(2, &tx_msg_info, (const uint8_t *)&latitude, 4);
+                    Driver_CAN2.MessageSend(2, &tx_msg_info, data_buf, 8); // On met debugBuf pour tester directement avec la latitude
+                    //Driver_CAN2.MessageSend(2, &tx_msg_info, (const uint8_t *)&latitude, 4);
                 } else {
                     sprintf(debugBuf, "Trame invalide\r\n");
                     while (Driver_USART2.GetStatus().tx_busy);
@@ -135,13 +136,12 @@ void GPS_CAN_Thread(void const *arg) {   // Tâche reception UART du GPS - Transm
                 Driver_USART2.Send(debugBuf, strlen(debugBuf));
             }
 
-            gps_data_ready = 0;   // On réinitialise pour relancer le cycle
             Driver_USART3.Receive(gps_buffer, GPS_BUF_TAILLE); 
         }
 
          
     }
-}
+
 osThreadDef(GPS_CAN_Thread, osPriorityNormal, 1, 0);
 
 
