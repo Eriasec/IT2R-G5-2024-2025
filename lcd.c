@@ -26,15 +26,6 @@ double lat_minsec;
 double lon_minsec;
 
 
-
-void conversionDMS(float lat, float lon){
-  int lat_deg = (int)(lat/100);
-  double lat_minsec = lat-(lat_deg*100);
-  int lon_deg = (int)(lon/100);
-  double lon_minsec = lon-(lon_deg*100);
-  
-}
-
 void myCAN1_callback(uint32_t obj_idx, uint32_t event)
 {
     if (event & ARM_CAN_EVENT_RECEIVE)
@@ -67,6 +58,17 @@ void InitCan1 (void) {
 	Driver_CAN1.SetMode(ARM_CAN_MODE_NORMAL);					// fin init
 }
 
+void Affichage_LCD_GPS(void)
+{  
+  GLCD_DrawRectangle(60, 40, 40, 80); // Bâtiment G
+  GLCD_DrawChar(45,165,'G');
+  GLCD_DrawRectangle(35, 130, 40, 80);    // Bâtiment Salle de DS
+  GLCD_DrawChar(70,75,' ');
+  GLCD_DrawRectangle(80, 120, 120, 25);   // Bâtiment E
+   
+  GLCD_DrawRectangle(200, 55, 17, 90);    // Entrée
+  GLCD_DrawRectangle(140, 55, 60, 25);    // Bâtiment administration
+}
 
 void CANthreadR(void const *argument)
 {
@@ -78,24 +80,46 @@ void CANthreadR(void const *argument)
 	float flatitude;
   float latitude;
   float longitude;
-  
-	
-	
+  int x;
+  int y;	
+  float lat_haut_droite = 4847.17*100;//78;   // Coordonnées précises des coins de la carte pour normaliser
+  float lat_haut_gauche = 4847.19*100;//94;
+  float lon_bas_gauche = 219.35*100;//57;
+  float lon_haut_gauche = 219.37*100;//79;
+  int lat_int;
+  int lon_int;
+
 	while(1)
 	{	
     
 		osSignalWait(0x01, osWaitForever);		// sommeil, en attente de reception
+    GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
+    GLCD_SetFont(&GLCD_Font_16x24);
+
+    GLCD_DrawChar(x, y, ' ');  // Supprimer le point précédent
 		// Code pour reception trame + affichage Id et Data sur LCD
     Driver_CAN1.MessageRead(0,&rx_msg_info,data_buf,8);
- 
+    GLCD_SetForegroundColor(GLCD_COLOR_BLACK);
+    Affichage_LCD_GPS();
+    
+    
 		memcpy(&latitude, &data_buf[0],4);
     memcpy(&longitude, &data_buf[4],4);
+    lat_int = (int)(latitude*100);
+    lon_int = (int)(longitude*100);
+    
 		identifiant=rx_msg_info.id;
-		
-		sprintf(texte,"%03X,  %f", identifiant,latitude);
+
+    x = (lat_int - lat_haut_gauche)/(lat_haut_droite - lat_haut_gauche)*320; // Normalisation pour afficher un point
+    y = (lon_int - lon_haut_gauche)/(lon_bas_gauche - lon_haut_gauche)*240;
+    GLCD_SetForegroundColor(GLCD_COLOR_MAGENTA);
+    GLCD_DrawChar(x, y, 'O');
+		sprintf(texte,"%03X %f", identifiant,latitude);
     sprintf(texte1,"%f",longitude);
-		GLCD_DrawString(10,10,(unsigned char*)texte);
-    GLCD_DrawString(10,80,(unsigned char*)texte1);
+      GLCD_SetFont(&GLCD_Font_6x8);
+
+		GLCD_DrawString(170,190,(unsigned char*)texte);
+    GLCD_DrawString(170,220,(unsigned char*)texte1);
 	}
   
 }
